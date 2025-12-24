@@ -33,12 +33,15 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'rspec', '~> 3.6', '>= 3.6.0'
 
   # Exclude the gemspec file itself and build artifacts
+  excluded_prefixes = ['pkg/', 'tmp/', '.git', '.github', '.travis', '.gitlab', 'coverage/']
   s.files = `find * -type f`.split("\n").uniq.sort.select do |f|
     next false if f.empty?
     # Explicitly exclude the gemspec file itself
     next false if f == 'sendpost_ruby_sdk.gemspec' || f.end_with?('.gemspec')
-    # Exclude build artifacts and other non-distributable files
-    next false if f.match?(/\.gem$|^pkg\//|^tmp\//|^\.git|^\.github|^\.travis|^\.gitlab|^coverage\//)
+    # Exclude build artifacts
+    next false if f.end_with?('.gem')
+    # Exclude directories and files that start with excluded prefixes
+    next false if excluded_prefixes.any? { |prefix| f.start_with?(prefix) }
     true
   end
   
