@@ -21,7 +21,7 @@ Gem::Specification.new do |s|
   s.platform    = Gem::Platform::RUBY
   s.authors     = ["Sendpost"]
   s.email       = ["dev@sendpost.io"]
-  s.homepage    = "https://github.com/sendpost/sendpost_ruby_sdk"
+  s.homepage    = "https://github.com/sendpost/sendpost-ruby-sdk"
   s.summary     = "SendPost Ruby API"
   s.description = "Email API and SMTP relay to not just send and measure email sending, but also alert and optimise. We provide you with tools, expertise and support needed to reliably deliver emails to your customers inboxes on time, every time."
   s.license     = "Unlicense"
@@ -32,8 +32,17 @@ Gem::Specification.new do |s|
 
   s.add_development_dependency 'rspec', '~> 3.6', '>= 3.6.0'
 
-  s.files         = `find *`.split("\n").uniq.sort.select { |f| !f.empty? }
-  s.test_files    = `find spec/*`.split("\n")
+  # Exclude the gemspec file itself and build artifacts
+  s.files = `find * -type f`.split("\n").uniq.sort.select do |f|
+    next false if f.empty?
+    # Explicitly exclude the gemspec file itself
+    next false if f == 'sendpost_ruby_sdk.gemspec' || f.end_with?('.gemspec')
+    # Exclude build artifacts and other non-distributable files
+    next false if f.match?(/\.gem$|^pkg\//|^tmp\//|^\.git|^\.github|^\.travis|^\.gitlab|^coverage\//)
+    true
+  end
+  
+  s.test_files = `find spec/* -type f`.split("\n").select { |f| !f.empty? }
   s.executables   = []
   s.require_paths = ["lib"]
 end
