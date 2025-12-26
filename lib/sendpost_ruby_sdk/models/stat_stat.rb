@@ -14,28 +14,39 @@ require 'date'
 require 'time'
 
 module Sendpost
-  class AccountStatsStat
+  # Statistics data for the date
+  class StatStat
+    # Number of emails accepted by SendPost API.
     attr_accessor :processed
 
+    # Number of emails sent.
     attr_accessor :sent
 
+    # Number of emails we were able to successfully deliver at SMTP without encountering any error
     attr_accessor :delivered
 
+    # Number of emails drop without attempting to deliver either because the email is invalid or email in in existing suppression list
     attr_accessor :dropped
 
+    # Number of emails dropped by SMTP.
     attr_accessor :smtp_dropped
 
+    # Number of emails where we got SMTP hard bounce error code by the recipient mail provider
     attr_accessor :hard_bounced
 
+    # Number of emails where we got temporary soft bounce error by the recipent mail provider. Soft bounced emails are retried upto 5 times over 24 hour period before marking them as hardBounced.
     attr_accessor :soft_bounced
 
+    # Number of emails opened by recipients
     attr_accessor :opened
 
+    # Number of email links clicked by recipients
     attr_accessor :clicked
 
+    # Number of email recipients who unsubscribed from receiving further emails
     attr_accessor :unsubscribed
 
-    # Number of spam complaints
+    # Number of email recipients who marked emails as spam
     attr_accessor :spam
 
     # Attribute mapping from ruby-style variable name to JSON key.
@@ -92,14 +103,14 @@ module Sendpost
     # @param [Hash] attributes Model attributes in the form of hash
     def initialize(attributes = {})
       if (!attributes.is_a?(Hash))
-        fail ArgumentError, "The input argument (attributes) must be a hash in `Sendpost::AccountStatsStat` initialize method"
+        fail ArgumentError, "The input argument (attributes) must be a hash in `Sendpost::StatStat` initialize method"
       end
 
       # check to see if the attribute exists and convert string to symbol for hash key
       acceptable_attribute_map = self.class.acceptable_attribute_map
       attributes = attributes.each_with_object({}) { |(k, v), h|
         if (!acceptable_attribute_map.key?(k.to_sym))
-          fail ArgumentError, "`#{k}` is not a valid attribute in `Sendpost::AccountStatsStat`. Please check the name to make sure it's valid. List of attributes: " + acceptable_attribute_map.keys.inspect
+          fail ArgumentError, "`#{k}` is not a valid attribute in `Sendpost::StatStat`. Please check the name to make sure it's valid. List of attributes: " + acceptable_attribute_map.keys.inspect
         end
         h[k.to_sym] = v
       }

@@ -14,44 +14,20 @@ require 'date'
 require 'time'
 
 module Sendpost
-  class AccountStatsStat
-    attr_accessor :processed
+  # SPF record host, type and value
+  class DomainSpf
+    attr_accessor :host
 
-    attr_accessor :sent
+    attr_accessor :type
 
-    attr_accessor :delivered
-
-    attr_accessor :dropped
-
-    attr_accessor :smtp_dropped
-
-    attr_accessor :hard_bounced
-
-    attr_accessor :soft_bounced
-
-    attr_accessor :opened
-
-    attr_accessor :clicked
-
-    attr_accessor :unsubscribed
-
-    # Number of spam complaints
-    attr_accessor :spam
+    attr_accessor :text_value
 
     # Attribute mapping from ruby-style variable name to JSON key.
     def self.attribute_map
       {
-        :'processed' => :'processed',
-        :'sent' => :'sent',
-        :'delivered' => :'delivered',
-        :'dropped' => :'dropped',
-        :'smtp_dropped' => :'smtpDropped',
-        :'hard_bounced' => :'hardBounced',
-        :'soft_bounced' => :'softBounced',
-        :'opened' => :'opened',
-        :'clicked' => :'clicked',
-        :'unsubscribed' => :'unsubscribed',
-        :'spam' => :'spam'
+        :'host' => :'host',
+        :'type' => :'type',
+        :'text_value' => :'textValue'
       }
     end
 
@@ -68,17 +44,9 @@ module Sendpost
     # Attribute type mapping.
     def self.openapi_types
       {
-        :'processed' => :'Integer',
-        :'sent' => :'Integer',
-        :'delivered' => :'Integer',
-        :'dropped' => :'Integer',
-        :'smtp_dropped' => :'Integer',
-        :'hard_bounced' => :'Integer',
-        :'soft_bounced' => :'Integer',
-        :'opened' => :'Integer',
-        :'clicked' => :'Integer',
-        :'unsubscribed' => :'Integer',
-        :'spam' => :'Integer'
+        :'host' => :'String',
+        :'type' => :'String',
+        :'text_value' => :'String'
       }
     end
 
@@ -92,60 +60,28 @@ module Sendpost
     # @param [Hash] attributes Model attributes in the form of hash
     def initialize(attributes = {})
       if (!attributes.is_a?(Hash))
-        fail ArgumentError, "The input argument (attributes) must be a hash in `Sendpost::AccountStatsStat` initialize method"
+        fail ArgumentError, "The input argument (attributes) must be a hash in `Sendpost::DomainSpf` initialize method"
       end
 
       # check to see if the attribute exists and convert string to symbol for hash key
       acceptable_attribute_map = self.class.acceptable_attribute_map
       attributes = attributes.each_with_object({}) { |(k, v), h|
         if (!acceptable_attribute_map.key?(k.to_sym))
-          fail ArgumentError, "`#{k}` is not a valid attribute in `Sendpost::AccountStatsStat`. Please check the name to make sure it's valid. List of attributes: " + acceptable_attribute_map.keys.inspect
+          fail ArgumentError, "`#{k}` is not a valid attribute in `Sendpost::DomainSpf`. Please check the name to make sure it's valid. List of attributes: " + acceptable_attribute_map.keys.inspect
         end
         h[k.to_sym] = v
       }
 
-      if attributes.key?(:'processed')
-        self.processed = attributes[:'processed']
+      if attributes.key?(:'host')
+        self.host = attributes[:'host']
       end
 
-      if attributes.key?(:'sent')
-        self.sent = attributes[:'sent']
+      if attributes.key?(:'type')
+        self.type = attributes[:'type']
       end
 
-      if attributes.key?(:'delivered')
-        self.delivered = attributes[:'delivered']
-      end
-
-      if attributes.key?(:'dropped')
-        self.dropped = attributes[:'dropped']
-      end
-
-      if attributes.key?(:'smtp_dropped')
-        self.smtp_dropped = attributes[:'smtp_dropped']
-      end
-
-      if attributes.key?(:'hard_bounced')
-        self.hard_bounced = attributes[:'hard_bounced']
-      end
-
-      if attributes.key?(:'soft_bounced')
-        self.soft_bounced = attributes[:'soft_bounced']
-      end
-
-      if attributes.key?(:'opened')
-        self.opened = attributes[:'opened']
-      end
-
-      if attributes.key?(:'clicked')
-        self.clicked = attributes[:'clicked']
-      end
-
-      if attributes.key?(:'unsubscribed')
-        self.unsubscribed = attributes[:'unsubscribed']
-      end
-
-      if attributes.key?(:'spam')
-        self.spam = attributes[:'spam']
+      if attributes.key?(:'text_value')
+        self.text_value = attributes[:'text_value']
       end
     end
 
@@ -169,17 +105,9 @@ module Sendpost
     def ==(o)
       return true if self.equal?(o)
       self.class == o.class &&
-          processed == o.processed &&
-          sent == o.sent &&
-          delivered == o.delivered &&
-          dropped == o.dropped &&
-          smtp_dropped == o.smtp_dropped &&
-          hard_bounced == o.hard_bounced &&
-          soft_bounced == o.soft_bounced &&
-          opened == o.opened &&
-          clicked == o.clicked &&
-          unsubscribed == o.unsubscribed &&
-          spam == o.spam
+          host == o.host &&
+          type == o.type &&
+          text_value == o.text_value
     end
 
     # @see the `==` method
@@ -191,7 +119,7 @@ module Sendpost
     # Calculates hash code according to all attributes.
     # @return [Integer] Hash code
     def hash
-      [processed, sent, delivered, dropped, smtp_dropped, hard_bounced, soft_bounced, opened, clicked, unsubscribed, spam].hash
+      [host, type, text_value].hash
     end
 
     # Builds the object from hash

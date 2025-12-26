@@ -19,11 +19,17 @@ module Sendpost
 
     attr_accessor :name
 
+    # Type of IP pool (0 = Shared, 1 = Dedicated)
+    attr_accessor :type
+
     attr_accessor :created
 
     attr_accessor :ips
 
     attr_accessor :third_party_sending_providers
+
+    # Related account IP pools
+    attr_accessor :to_account_ip_pools
 
     attr_accessor :routing_strategy
 
@@ -49,9 +55,11 @@ module Sendpost
       {
         :'id' => :'id',
         :'name' => :'name',
+        :'type' => :'type',
         :'created' => :'created',
         :'ips' => :'ips',
         :'third_party_sending_providers' => :'thirdPartySendingProviders',
+        :'to_account_ip_pools' => :'toAccountIPPools',
         :'routing_strategy' => :'routingStrategy',
         :'routing_meta_data' => :'routingMetaData',
         :'auto_warmup_enabled' => :'autoWarmupEnabled',
@@ -78,9 +86,11 @@ module Sendpost
       {
         :'id' => :'Integer',
         :'name' => :'String',
+        :'type' => :'Integer',
         :'created' => :'Integer',
         :'ips' => :'Array<IP>',
         :'third_party_sending_providers' => :'Array<ThirdPartySendingProvider>',
+        :'to_account_ip_pools' => :'Array<IPPool>',
         :'routing_strategy' => :'Integer',
         :'routing_meta_data' => :'String',
         :'auto_warmup_enabled' => :'Boolean',
@@ -122,6 +132,10 @@ module Sendpost
         self.name = attributes[:'name']
       end
 
+      if attributes.key?(:'type')
+        self.type = attributes[:'type']
+      end
+
       if attributes.key?(:'created')
         self.created = attributes[:'created']
       end
@@ -135,6 +149,12 @@ module Sendpost
       if attributes.key?(:'third_party_sending_providers')
         if (value = attributes[:'third_party_sending_providers']).is_a?(Array)
           self.third_party_sending_providers = value
+        end
+      end
+
+      if attributes.key?(:'to_account_ip_pools')
+        if (value = attributes[:'to_account_ip_pools']).is_a?(Array)
+          self.to_account_ip_pools = value
         end
       end
 
@@ -193,9 +213,11 @@ module Sendpost
       self.class == o.class &&
           id == o.id &&
           name == o.name &&
+          type == o.type &&
           created == o.created &&
           ips == o.ips &&
           third_party_sending_providers == o.third_party_sending_providers &&
+          to_account_ip_pools == o.to_account_ip_pools &&
           routing_strategy == o.routing_strategy &&
           routing_meta_data == o.routing_meta_data &&
           auto_warmup_enabled == o.auto_warmup_enabled &&
@@ -215,7 +237,7 @@ module Sendpost
     # Calculates hash code according to all attributes.
     # @return [Integer] Hash code
     def hash
-      [id, name, created, ips, third_party_sending_providers, routing_strategy, routing_meta_data, auto_warmup_enabled, infra_monitor, ip_domain_warmup_status, should_overflow, overflow_pool_name, warmup_interval].hash
+      [id, name, type, created, ips, third_party_sending_providers, to_account_ip_pools, routing_strategy, routing_meta_data, auto_warmup_enabled, infra_monitor, ip_domain_warmup_status, should_overflow, overflow_pool_name, warmup_interval].hash
     end
 
     # Builds the object from hash

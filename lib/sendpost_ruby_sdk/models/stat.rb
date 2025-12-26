@@ -18,13 +18,13 @@ module Sendpost
     # Date for which stats are retrieved (UTC).
     attr_accessor :date
 
-    attr_accessor :stats
+    attr_accessor :stat
 
     # Attribute mapping from ruby-style variable name to JSON key.
     def self.attribute_map
       {
         :'date' => :'date',
-        :'stats' => :'stats'
+        :'stat' => :'stat'
       }
     end
 
@@ -42,7 +42,7 @@ module Sendpost
     def self.openapi_types
       {
         :'date' => :'Date',
-        :'stats' => :'StatStats'
+        :'stat' => :'StatStat'
       }
     end
 
@@ -72,8 +72,8 @@ module Sendpost
         self.date = attributes[:'date']
       end
 
-      if attributes.key?(:'stats')
-        self.stats = attributes[:'stats']
+      if attributes.key?(:'stat')
+        self.stat = attributes[:'stat']
       end
     end
 
@@ -98,7 +98,7 @@ module Sendpost
       return true if self.equal?(o)
       self.class == o.class &&
           date == o.date &&
-          stats == o.stats
+          stat == o.stat
     end
 
     # @see the `==` method
@@ -110,7 +110,7 @@ module Sendpost
     # Calculates hash code according to all attributes.
     # @return [Integer] Hash code
     def hash
-      [date, stats].hash
+      [date, stat].hash
     end
 
     # Builds the object from hash

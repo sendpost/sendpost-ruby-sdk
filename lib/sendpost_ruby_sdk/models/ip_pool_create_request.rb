@@ -27,6 +27,15 @@ module Sendpost
 
     attr_accessor :overflow_pool
 
+    # Warmup interval in hours. Must be greater than 0.
+    attr_accessor :warmup_interval
+
+    # Overflow strategy (0 = None, 1 = Use overflow pool)
+    attr_accessor :overflow_strategy
+
+    # Name of the overflow pool (required if overflowStrategy is 1)
+    attr_accessor :overflow_pool_name
+
     # Attribute mapping from ruby-style variable name to JSON key.
     def self.attribute_map
       {
@@ -35,7 +44,10 @@ module Sendpost
         :'tpsps' => :'tpsps',
         :'routing_strategy' => :'routingStrategy',
         :'routing_meta_data' => :'routingMetaData',
-        :'overflow_pool' => :'overflowPool'
+        :'overflow_pool' => :'overflowPool',
+        :'warmup_interval' => :'warmupInterval',
+        :'overflow_strategy' => :'overflowStrategy',
+        :'overflow_pool_name' => :'overflowPoolName'
       }
     end
 
@@ -57,7 +69,10 @@ module Sendpost
         :'tpsps' => :'Array<Integer>',
         :'routing_strategy' => :'Integer',
         :'routing_meta_data' => :'String',
-        :'overflow_pool' => :'Boolean'
+        :'overflow_pool' => :'Boolean',
+        :'warmup_interval' => :'Integer',
+        :'overflow_strategy' => :'Integer',
+        :'overflow_pool_name' => :'String'
       }
     end
 
@@ -110,6 +125,18 @@ module Sendpost
       if attributes.key?(:'overflow_pool')
         self.overflow_pool = attributes[:'overflow_pool']
       end
+
+      if attributes.key?(:'warmup_interval')
+        self.warmup_interval = attributes[:'warmup_interval']
+      end
+
+      if attributes.key?(:'overflow_strategy')
+        self.overflow_strategy = attributes[:'overflow_strategy']
+      end
+
+      if attributes.key?(:'overflow_pool_name')
+        self.overflow_pool_name = attributes[:'overflow_pool_name']
+      end
     end
 
     # Show invalid properties with the reasons. Usually used together with valid?
@@ -137,7 +164,10 @@ module Sendpost
           tpsps == o.tpsps &&
           routing_strategy == o.routing_strategy &&
           routing_meta_data == o.routing_meta_data &&
-          overflow_pool == o.overflow_pool
+          overflow_pool == o.overflow_pool &&
+          warmup_interval == o.warmup_interval &&
+          overflow_strategy == o.overflow_strategy &&
+          overflow_pool_name == o.overflow_pool_name
     end
 
     # @see the `==` method
@@ -149,7 +179,7 @@ module Sendpost
     # Calculates hash code according to all attributes.
     # @return [Integer] Hash code
     def hash
-      [name, ips, tpsps, routing_strategy, routing_meta_data, overflow_pool].hash
+      [name, ips, tpsps, routing_strategy, routing_meta_data, overflow_pool, warmup_interval, overflow_strategy, overflow_pool_name].hash
     end
 
     # Builds the object from hash

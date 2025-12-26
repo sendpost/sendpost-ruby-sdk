@@ -23,6 +23,8 @@ module Sendpost
 
     attr_accessor :dkim
 
+    attr_accessor :spf
+
     attr_accessor :return_path
 
     attr_accessor :track
@@ -34,6 +36,12 @@ module Sendpost
 
     # Status of DKIM verification ( true or false )
     attr_accessor :dkim_verified
+
+    # Status of SPF verification ( true or false )
+    attr_accessor :spf_verified
+
+    # Status of Mailbox verification ( true or false )
+    attr_accessor :mailbox_verified
 
     # Status of DMARC verification ( true or false)
     attr_accessor :dmarc_verified
@@ -76,11 +84,14 @@ module Sendpost
         :'id' => :'id',
         :'name' => :'name',
         :'dkim' => :'dkim',
+        :'spf' => :'spf',
         :'return_path' => :'returnPath',
         :'track' => :'track',
         :'dmarc' => :'dmarc',
         :'dkim_config' => :'dkimConfig',
         :'dkim_verified' => :'dkimVerified',
+        :'spf_verified' => :'spfVerified',
+        :'mailbox_verified' => :'mailboxVerified',
         :'dmarc_verified' => :'dmarcVerified',
         :'return_path_verified' => :'returnPathVerified',
         :'track_verified' => :'trackVerified',
@@ -112,11 +123,14 @@ module Sendpost
         :'id' => :'Integer',
         :'name' => :'String',
         :'dkim' => :'DomainDkim',
+        :'spf' => :'DomainSpf',
         :'return_path' => :'DomainReturnPath',
         :'track' => :'DomainTrack',
         :'dmarc' => :'DomainDmarc',
         :'dkim_config' => :'String',
         :'dkim_verified' => :'Boolean',
+        :'spf_verified' => :'Boolean',
+        :'mailbox_verified' => :'Boolean',
         :'dmarc_verified' => :'Boolean',
         :'return_path_verified' => :'Boolean',
         :'track_verified' => :'Boolean',
@@ -166,6 +180,10 @@ module Sendpost
         self.dkim = attributes[:'dkim']
       end
 
+      if attributes.key?(:'spf')
+        self.spf = attributes[:'spf']
+      end
+
       if attributes.key?(:'return_path')
         self.return_path = attributes[:'return_path']
       end
@@ -184,6 +202,14 @@ module Sendpost
 
       if attributes.key?(:'dkim_verified')
         self.dkim_verified = attributes[:'dkim_verified']
+      end
+
+      if attributes.key?(:'spf_verified')
+        self.spf_verified = attributes[:'spf_verified']
+      end
+
+      if attributes.key?(:'mailbox_verified')
+        self.mailbox_verified = attributes[:'mailbox_verified']
       end
 
       if attributes.key?(:'dmarc_verified')
@@ -258,11 +284,14 @@ module Sendpost
           id == o.id &&
           name == o.name &&
           dkim == o.dkim &&
+          spf == o.spf &&
           return_path == o.return_path &&
           track == o.track &&
           dmarc == o.dmarc &&
           dkim_config == o.dkim_config &&
           dkim_verified == o.dkim_verified &&
+          spf_verified == o.spf_verified &&
+          mailbox_verified == o.mailbox_verified &&
           dmarc_verified == o.dmarc_verified &&
           return_path_verified == o.return_path_verified &&
           track_verified == o.track_verified &&
@@ -286,7 +315,7 @@ module Sendpost
     # Calculates hash code according to all attributes.
     # @return [Integer] Hash code
     def hash
-      [id, name, dkim, return_path, track, dmarc, dkim_config, dkim_verified, dmarc_verified, return_path_verified, track_verified, verified, domain_registered_date, created, gpt_verified, gpt, dmarc_failure_reason, dkim_failure_reason, track_failure_reason, return_path_failure_reason].hash
+      [id, name, dkim, spf, return_path, track, dmarc, dkim_config, dkim_verified, spf_verified, mailbox_verified, dmarc_verified, return_path_verified, track_verified, verified, domain_registered_date, created, gpt_verified, gpt, dmarc_failure_reason, dkim_failure_reason, track_failure_reason, return_path_failure_reason].hash
     end
 
     # Builds the object from hash

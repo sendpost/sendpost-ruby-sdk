@@ -68,6 +68,48 @@ module Sendpost
     # Configuration for AT&T delivery settings in JSON format
     attr_accessor :att_settings
 
+    # Configuration for Office365 delivery settings in JSON format
+    attr_accessor :office365_settings
+
+    # Configuration for Google Workspace delivery settings in JSON format
+    attr_accessor :googleworkspace_settings
+
+    # Configuration for Proofpoint delivery settings in JSON format
+    attr_accessor :proofpoint_settings
+
+    # Configuration for Mimecast delivery settings in JSON format
+    attr_accessor :mimecast_settings
+
+    # Configuration for Barracuda delivery settings in JSON format
+    attr_accessor :barracuda_settings
+
+    # Configuration for Cisco IronPort delivery settings in JSON format
+    attr_accessor :ciscoironport_settings
+
+    # Configuration for Rackspace delivery settings in JSON format
+    attr_accessor :rackspace_settings
+
+    # Configuration for Zoho Business delivery settings in JSON format
+    attr_accessor :zohobusiness_settings
+
+    # Configuration for Amazon WorkMail delivery settings in JSON format
+    attr_accessor :amazonworkmail_settings
+
+    # Configuration for Symantec delivery settings in JSON format
+    attr_accessor :symantec_settings
+
+    # Configuration for Fortinet delivery settings in JSON format
+    attr_accessor :fortinet_settings
+
+    # Configuration for Sophos delivery settings in JSON format
+    attr_accessor :sophos_settings
+
+    # Configuration for TrendMicro delivery settings in JSON format
+    attr_accessor :trendmicro_settings
+
+    # Configuration for CheckPoint delivery settings in JSON format
+    attr_accessor :checkpoint_settings
+
     # The timestamp (UNIX epoch) when the IP was created
     attr_accessor :created
 
@@ -82,6 +124,9 @@ module Sendpost
 
     # The auto-warmup plan associated with the IP. Can be null if no warmup plan is assigned.
     attr_accessor :auto_warmup_plan
+
+    # Labels associated with the IP
+    attr_accessor :labels
 
     # Attribute mapping from ruby-style variable name to JSON key.
     def self.attribute_map
@@ -104,11 +149,26 @@ module Sendpost
         :'qq_settings' => :'qqSettings',
         :'default_settings' => :'defaultSettings',
         :'att_settings' => :'attSettings',
+        :'office365_settings' => :'office365Settings',
+        :'googleworkspace_settings' => :'googleworkspaceSettings',
+        :'proofpoint_settings' => :'proofpointSettings',
+        :'mimecast_settings' => :'mimecastSettings',
+        :'barracuda_settings' => :'barracudaSettings',
+        :'ciscoironport_settings' => :'ciscoironportSettings',
+        :'rackspace_settings' => :'rackspaceSettings',
+        :'zohobusiness_settings' => :'zohobusinessSettings',
+        :'amazonworkmail_settings' => :'amazonworkmailSettings',
+        :'symantec_settings' => :'symantecSettings',
+        :'fortinet_settings' => :'fortinetSettings',
+        :'sophos_settings' => :'sophosSettings',
+        :'trendmicro_settings' => :'trendmicroSettings',
+        :'checkpoint_settings' => :'checkpointSettings',
         :'created' => :'created',
         :'infra_classification' => :'infraClassification',
         :'infra_monitor' => :'infraMonitor',
         :'state' => :'state',
-        :'auto_warmup_plan' => :'autoWarmupPlan'
+        :'auto_warmup_plan' => :'autoWarmupPlan',
+        :'labels' => :'labels'
       }
     end
 
@@ -143,11 +203,26 @@ module Sendpost
         :'qq_settings' => :'String',
         :'default_settings' => :'String',
         :'att_settings' => :'String',
+        :'office365_settings' => :'String',
+        :'googleworkspace_settings' => :'String',
+        :'proofpoint_settings' => :'String',
+        :'mimecast_settings' => :'String',
+        :'barracuda_settings' => :'String',
+        :'ciscoironport_settings' => :'String',
+        :'rackspace_settings' => :'String',
+        :'zohobusiness_settings' => :'String',
+        :'amazonworkmail_settings' => :'String',
+        :'symantec_settings' => :'String',
+        :'fortinet_settings' => :'String',
+        :'sophos_settings' => :'String',
+        :'trendmicro_settings' => :'String',
+        :'checkpoint_settings' => :'String',
         :'created' => :'Integer',
         :'infra_classification' => :'String',
         :'infra_monitor' => :'Boolean',
         :'state' => :'Integer',
-        :'auto_warmup_plan' => :'AutoWarmupPlan'
+        :'auto_warmup_plan' => :'AutoWarmupPlan',
+        :'labels' => :'Array<Label>'
       }
     end
 
@@ -249,6 +324,62 @@ module Sendpost
         self.att_settings = attributes[:'att_settings']
       end
 
+      if attributes.key?(:'office365_settings')
+        self.office365_settings = attributes[:'office365_settings']
+      end
+
+      if attributes.key?(:'googleworkspace_settings')
+        self.googleworkspace_settings = attributes[:'googleworkspace_settings']
+      end
+
+      if attributes.key?(:'proofpoint_settings')
+        self.proofpoint_settings = attributes[:'proofpoint_settings']
+      end
+
+      if attributes.key?(:'mimecast_settings')
+        self.mimecast_settings = attributes[:'mimecast_settings']
+      end
+
+      if attributes.key?(:'barracuda_settings')
+        self.barracuda_settings = attributes[:'barracuda_settings']
+      end
+
+      if attributes.key?(:'ciscoironport_settings')
+        self.ciscoironport_settings = attributes[:'ciscoironport_settings']
+      end
+
+      if attributes.key?(:'rackspace_settings')
+        self.rackspace_settings = attributes[:'rackspace_settings']
+      end
+
+      if attributes.key?(:'zohobusiness_settings')
+        self.zohobusiness_settings = attributes[:'zohobusiness_settings']
+      end
+
+      if attributes.key?(:'amazonworkmail_settings')
+        self.amazonworkmail_settings = attributes[:'amazonworkmail_settings']
+      end
+
+      if attributes.key?(:'symantec_settings')
+        self.symantec_settings = attributes[:'symantec_settings']
+      end
+
+      if attributes.key?(:'fortinet_settings')
+        self.fortinet_settings = attributes[:'fortinet_settings']
+      end
+
+      if attributes.key?(:'sophos_settings')
+        self.sophos_settings = attributes[:'sophos_settings']
+      end
+
+      if attributes.key?(:'trendmicro_settings')
+        self.trendmicro_settings = attributes[:'trendmicro_settings']
+      end
+
+      if attributes.key?(:'checkpoint_settings')
+        self.checkpoint_settings = attributes[:'checkpoint_settings']
+      end
+
       if attributes.key?(:'created')
         self.created = attributes[:'created']
       else
@@ -269,6 +400,12 @@ module Sendpost
 
       if attributes.key?(:'auto_warmup_plan')
         self.auto_warmup_plan = attributes[:'auto_warmup_plan']
+      end
+
+      if attributes.key?(:'labels')
+        if (value = attributes[:'labels']).is_a?(Array)
+          self.labels = value
+        end
       end
     end
 
@@ -355,11 +492,26 @@ module Sendpost
           qq_settings == o.qq_settings &&
           default_settings == o.default_settings &&
           att_settings == o.att_settings &&
+          office365_settings == o.office365_settings &&
+          googleworkspace_settings == o.googleworkspace_settings &&
+          proofpoint_settings == o.proofpoint_settings &&
+          mimecast_settings == o.mimecast_settings &&
+          barracuda_settings == o.barracuda_settings &&
+          ciscoironport_settings == o.ciscoironport_settings &&
+          rackspace_settings == o.rackspace_settings &&
+          zohobusiness_settings == o.zohobusiness_settings &&
+          amazonworkmail_settings == o.amazonworkmail_settings &&
+          symantec_settings == o.symantec_settings &&
+          fortinet_settings == o.fortinet_settings &&
+          sophos_settings == o.sophos_settings &&
+          trendmicro_settings == o.trendmicro_settings &&
+          checkpoint_settings == o.checkpoint_settings &&
           created == o.created &&
           infra_classification == o.infra_classification &&
           infra_monitor == o.infra_monitor &&
           state == o.state &&
-          auto_warmup_plan == o.auto_warmup_plan
+          auto_warmup_plan == o.auto_warmup_plan &&
+          labels == o.labels
     end
 
     # @see the `==` method
@@ -371,7 +523,7 @@ module Sendpost
     # Calculates hash code according to all attributes.
     # @return [Integer] Hash code
     def hash
-      [id, public_ip, system_domain, reverse_dns_hostname, type, gmail_settings, yahoo_settings, aol_settings, microsoft_settings, comcast_settings, yandex_settings, gmx_settings, mailru_settings, icloud_settings, zoho_settings, qq_settings, default_settings, att_settings, created, infra_classification, infra_monitor, state, auto_warmup_plan].hash
+      [id, public_ip, system_domain, reverse_dns_hostname, type, gmail_settings, yahoo_settings, aol_settings, microsoft_settings, comcast_settings, yandex_settings, gmx_settings, mailru_settings, icloud_settings, zoho_settings, qq_settings, default_settings, att_settings, office365_settings, googleworkspace_settings, proofpoint_settings, mimecast_settings, barracuda_settings, ciscoironport_settings, rackspace_settings, zohobusiness_settings, amazonworkmail_settings, symantec_settings, fortinet_settings, sophos_settings, trendmicro_settings, checkpoint_settings, created, infra_classification, infra_monitor, state, auto_warmup_plan, labels].hash
     end
 
     # Builds the object from hash
