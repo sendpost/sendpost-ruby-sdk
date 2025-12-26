@@ -520,7 +520,10 @@ puts "Suppressions added successfully"
 #### List Suppressions
 
 ```ruby
-suppressions = suppression_api.get_suppression_list
+to_date = Date.today
+from_date = to_date - 7
+
+suppressions = suppression_api.get_suppression_list(from_date, to_date)
 
 suppressions.each do |suppression|
   puts "Email: #{suppression.email}"
