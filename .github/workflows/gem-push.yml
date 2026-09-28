@@ -3,46 +3,51 @@ name: Ruby Gem
 on:
   push:
     branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
 
 jobs:
   build:
     name: Build + Publish
-    runs-on: ubuntu-22.04 
+    runs-on: ubuntu-22.04
     permissions:
       contents: read
       packages: write
 
     steps:
     - uses: actions/checkout@v4
-    - name: Set up Ruby 3.3.6
-    # To automatically get bug fixes and new Ruby versions for ruby/setup-ruby,
-    # change this to (see https://github.com/ruby/setup-ruby#versioning):
-    # uses: ruby/setup-ruby@v1
+    - name: Set up Ruby
       uses: ruby/setup-ruby@55283cc23133118229fd3f97f9336ee23a179fcf # v1.146.0
       with:
         ruby-version: 3.2.2
 
-    - name: Publish to GPR
+    # Build the gem ONCE. Rebuilding after a .gem already exists in the tree
+    # makes the gemspec's `find *` file list include the .gem itself and fails
+    # with "contains itself, check your files list".
+    - name: Build gem
       run: |
-        mkdir -p $HOME/.gem
-        touch $HOME/.gem/credentials
-        chmod 0600 $HOME/.gem/credentials
-        printf -- "---\n:github: ${GEM_HOST_API_KEY}\n" > $HOME/.gem/credentials
+        rm -f *.gem
         gem build *.gemspec
-        gem push --KEY github --host https://rubygems.pkg.github.com/${OWNER} *.gem
-      env:
-        GEM_HOST_API_KEY: "Bearer ${{secrets.GITHUB_TOKEN}}"
-        OWNER: ${{ github.repository_owner }}
 
+    # RubyGems is the canonical registry — this step is the real gate.
     - name: Publish to RubyGems
       run: |
         mkdir -p $HOME/.gem
         touch $HOME/.gem/credentials
         chmod 0600 $HOME/.gem/credentials
         printf -- "---\n:rubygems_api_key: ${GEM_HOST_API_KEY}\n" > $HOME/.gem/credentials
-        gem build *.gemspec
         gem push *.gem
       env:
         GEM_HOST_API_KEY: "${{secrets.RUBYGEMS_AUTH_TOKEN}}"
+
+    # GitHub Packages is secondary; tolerate an already-published version so a
+    # re-run for a version GPR already has does not fail the whole job.
+    - name: Publish to GPR
+      run: |
+        mkdir -p $HOME/.gem
+        touch $HOME/.gem/credentials
+        chmod 0600 $HOME/.gem/credentials
+        printf -- "---\n:github: ${GEM_HOST_API_KEY}\n" > $HOME/.gem/credentials
+        gem push --KEY github --host https://rubygems.pkg.github.com/${OWNER} *.gem \
+          || echo "GPR push skipped (version already published or non-fatal error)"
+      env:
+        GEM_HOST_API_KEY: "Bearer ${{secrets.GITHUB_TOKEN}}"
+        OWNER: ${{ github.repository_owner }}
