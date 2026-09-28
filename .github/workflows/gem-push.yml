@@ -28,13 +28,25 @@ jobs:
         gem build *.gemspec
 
     # RubyGems is the canonical registry — this step is the real gate.
+    # Idempotent: an already-published version (e.g. a re-run, or a gem-push
+    # retry after a successful upload) is treated as success, not a failure.
     - name: Publish to RubyGems
       run: |
         mkdir -p $HOME/.gem
         touch $HOME/.gem/credentials
         chmod 0600 $HOME/.gem/credentials
         printf -- "---\n:rubygems_api_key: ${GEM_HOST_API_KEY}\n" > $HOME/.gem/credentials
-        gem push *.gem
+        set +e
+        out=$(gem push *.gem 2>&1); code=$?
+        set -e
+        echo "$out"
+        if [ $code -eq 0 ]; then
+          echo "RubyGems: published."
+        elif echo "$out" | grep -qi "Repushing of gem versions is not allowed"; then
+          echo "RubyGems: this version is already published - treating as success."
+        else
+          echo "RubyGems push failed."; exit 1
+        fi
       env:
         GEM_HOST_API_KEY: "${{secrets.RUBYGEMS_AUTH_TOKEN}}"
 
