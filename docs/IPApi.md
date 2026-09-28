@@ -17,7 +17,7 @@ All URIs are relative to *https://api.sendpost.io/api/v1*
 
 Allocate IP
 
-Allocates a new IP resource to the account. 
+Request allocation of a new dedicated IP address to your account. New IPs start in warmup state to build sender reputation gradually.  **Warmup Process:** - New IPs have limited daily sending capacity - Volume increases automatically each day while `autoWarmupEnabled` is set - Full capacity typically reached after 30-45 days - Consistent, engagement-positive sending accelerates warmup  **When to Allocate New IPs:** - Scaling beyond current IP capacity - Separating different email streams (transactional vs marketing) - Geographic IP requirements - Replacing an IP with poor reputation  **Best Practices:** - Dedicated IPs require consistent volume (10k+ emails/month ideal) - Low volume on dedicated IPs can harm deliverability - Consider shared IPs for low-volume senders 
 
 ### Examples
 
@@ -33,7 +33,7 @@ Sendpost.configure do |config|
 end
 
 api_instance = Sendpost::IPApi.new
-ip_allocation_request = Sendpost::IPAllocationRequest.new({overflow_pool: true, ips: ['34.21.14.11']}) # IPAllocationRequest | 
+ip_allocation_request = Sendpost::IPAllocationRequest.new({ips: [34.21.14.11,  34.21.14.12]}) # IPAllocationRequest | 
 
 begin
   # Allocate IP
@@ -88,7 +88,7 @@ end
 
 Delete IP
 
-Deletes a specific IP resource based on the provided IP ID. 
+Remove an IP address from your account. This action is irreversible.  **⚠️ Before Deleting:** - Remove the IP from all IP pools first - Ensure no active sending relies on this IP - Consider impact on overall sending capacity  **Note:** You cannot delete an IP that is currently assigned to an IP pool. 
 
 ### Examples
 
@@ -104,7 +104,7 @@ Sendpost.configure do |config|
 end
 
 api_instance = Sendpost::IPApi.new
-ip_id = 56 # Integer | The ID of the IP resource to delete
+ip_id = 11322 # Integer | The unique ID of the IP resource to delete.
 
 begin
   # Delete IP
@@ -137,7 +137,7 @@ end
 
 | Name | Type | Description | Notes |
 | ---- | ---- | ----------- | ----- |
-| **ip_id** | **Integer** | The ID of the IP resource to delete |  |
+| **ip_id** | **Integer** | The unique ID of the IP resource to delete. |  |
 
 ### Return type
 
@@ -159,7 +159,7 @@ end
 
 List IPs
 
-Retrieves a list of all IPs associated with the main account. 
+Retrieve all IP addresses allocated to your account. IPs are the foundation of your sending infrastructure and directly impact deliverability.  **IP Types:** | Type | Value | Description | |------|-------|-------------| | Shared | `0` | IP shared with other SendPost senders. Cost-effective, reputation is pooled. | | Dedicated | `1` | Exclusive IP for your account. Full control over sender reputation. |  **IP States:** | State | Value | Description | |-------|-------|-------------| | Warmup | `0` | New IP building reputation. Volume is limited and gradually increases. | | Normal | `1` | Fully warmed IP ready for normal sending volume. |  **Warmup Information:** - `autoWarmupEnabled` - Whether SendPost is automatically increasing volume  **Use Cases:** - Monitor IP warmup progress for new IPs - Audit shared vs dedicated IP allocation - Plan IP pool configurations - Check available sending capacity 
 
 ### Examples
 
@@ -176,9 +176,9 @@ end
 
 api_instance = Sendpost::IPApi.new
 opts = {
-  limit: 56, # Integer | Number of records to return per request
-  offset: 56, # Integer | Number of initial records to skip
-  search: 'search_example' # String | Case insensitive search against IP's public IP address
+  limit: 50, # Integer | Number of records to return per request. Default 20.
+  offset: 0, # Integer | Number of initial records to skip for pagination.
+  search: '52.34' # String | Case insensitive search against public IP addresses.
 }
 
 begin
@@ -212,9 +212,9 @@ end
 
 | Name | Type | Description | Notes |
 | ---- | ---- | ----------- | ----- |
-| **limit** | **Integer** | Number of records to return per request | [optional] |
-| **offset** | **Integer** | Number of initial records to skip | [optional] |
-| **search** | **String** | Case insensitive search against IP&#39;s public IP address | [optional] |
+| **limit** | **Integer** | Number of records to return per request. Default 20. | [optional][default to 20] |
+| **offset** | **Integer** | Number of initial records to skip for pagination. | [optional][default to 0] |
+| **search** | **String** | Case insensitive search against public IP addresses. | [optional] |
 
 ### Return type
 
@@ -236,7 +236,7 @@ end
 
 Get IP
 
-Retrieves detailed information about a specific IP based on the provided ID. 
+Retrieve detailed information about a specific IP address, including its warmup status, type, and configuration.  **Use Cases:** - Check warmup progress for a new dedicated IP - Verify IP configuration before adding to a pool - Debug deliverability issues by checking IP state - Monitor auto-warmup progress 
 
 ### Examples
 
@@ -252,7 +252,7 @@ Sendpost.configure do |config|
 end
 
 api_instance = Sendpost::IPApi.new
-ip_id = 56 # Integer | The ID of the IP resource to retrieve
+ip_id = 11322 # Integer | The unique ID of the IP resource to retrieve.
 
 begin
   # Get IP
@@ -285,7 +285,7 @@ end
 
 | Name | Type | Description | Notes |
 | ---- | ---- | ----------- | ----- |
-| **ip_id** | **Integer** | The ID of the IP resource to retrieve |  |
+| **ip_id** | **Integer** | The unique ID of the IP resource to retrieve. |  |
 
 ### Return type
 
@@ -307,7 +307,7 @@ end
 
 Update IP
 
-Updates an existing IP resource based on the provided IP ID. 
+Modify settings for an existing IP address. Use this to manage warmup configuration.  **Configurable Settings:** - `autoWarmupEnabled` - Enable/disable automatic warmup schedule  **Use Cases:** - Pause auto-warmup during low-volume periods - Re-enable warmup after manual intervention - Adjust warmup settings based on sending patterns 
 
 ### Examples
 
@@ -323,8 +323,8 @@ Sendpost.configure do |config|
 end
 
 api_instance = Sendpost::IPApi.new
-ip_update_request = Sendpost::IPUpdateRequest.new({auto_warmup_enabled: false}) # IPUpdateRequest | 
-ip_id = 56 # Integer | The ID of the IP resource to update
+ip_update_request = Sendpost::IPUpdateRequest.new # IPUpdateRequest | 
+ip_id = 11322 # Integer | The unique ID of the IP resource to update.
 
 begin
   # Update IP
@@ -358,7 +358,7 @@ end
 | Name | Type | Description | Notes |
 | ---- | ---- | ----------- | ----- |
 | **ip_update_request** | [**IPUpdateRequest**](IPUpdateRequest.md) |  |  |
-| **ip_id** | **Integer** | The ID of the IP resource to update |  |
+| **ip_id** | **Integer** | The unique ID of the IP resource to update. |  |
 
 ### Return type
 

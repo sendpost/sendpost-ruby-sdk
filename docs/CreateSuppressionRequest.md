@@ -4,10 +4,10 @@
 
 | Name | Type | Description | Notes |
 | ---- | ---- | ----------- | ----- |
-| **hard_bounce** | [**Array&lt;CreateSuppressionRequestHardBounceInner&gt;**](CreateSuppressionRequestHardBounceInner.md) | list of email addresses which you want to mark in hardBounce suppression list | [optional] |
-| **manual** | [**Array&lt;CreateSuppressionRequestManualInner&gt;**](CreateSuppressionRequestManualInner.md) | list of email addresses which you want to mark in manual suppression list | [optional] |
-| **unsubscribe** | [**Array&lt;CreateSuppressionRequestUnsubscribeInner&gt;**](CreateSuppressionRequestUnsubscribeInner.md) | list of email addresses which you want to mark in unsubscribe suppression list | [optional] |
-| **spam_complaint** | [**Array&lt;CreateSuppressionRequestSpamComplaintInner&gt;**](CreateSuppressionRequestSpamComplaintInner.md) | list of email addresses which you want to mark in spamComplaint suppression list | [optional] |
+| **hard_bounce** | [**Array&lt;CreateSuppressionRequestHardBounceInner&gt;**](CreateSuppressionRequestHardBounceInner.md) | Email addresses with known permanent delivery issues (invalid, non-existent domains). | [optional] |
+| **manual** | [**Array&lt;CreateSuppressionRequestManualInner&gt;**](CreateSuppressionRequestManualInner.md) | Email addresses to suppress without specific categorization (do-not-contact requests, etc.). | [optional] |
+| **unsubscribe** | [**Array&lt;CreateSuppressionRequestUnsubscribeInner&gt;**](CreateSuppressionRequestUnsubscribeInner.md) | Email addresses of users who opted out via external unsubscribe mechanisms. | [optional] |
+| **spam_complaint** | [**Array&lt;CreateSuppressionRequestSpamComplaintInner&gt;**](CreateSuppressionRequestSpamComplaintInner.md) | Email addresses that reported spam via external feedback loops. | [optional] |
 
 ## Example
 

@@ -4,10 +4,10 @@
 
 | Name | Type | Description | Notes |
 | ---- | ---- | ----------- | ----- |
-| **family** | **String** |  | [optional] |
-| **major** | **String** |  | [optional] |
-| **minor** | **String** |  | [optional] |
-| **patch** | **String** |  | [optional] |
+| **family** | **String** | Browser or email client family name. Common values: Chrome, Safari, Firefox, Outlook, Apple Mail, Gmail  | [optional] |
+| **major** | **String** | Major version number | [optional] |
+| **minor** | **String** | Minor version number | [optional] |
+| **patch** | **String** | Patch version number | [optional] |
 
 ## Example
 
@@ -15,10 +15,10 @@
 require 'sendpost_ruby_sdk'
 
 instance = Sendpost::UserAgent.new(
-  family: Mozilla,
-  major: 5.0,
+  family: Chrome,
+  major: 120,
   minor: 0,
-  patch: 0
+  patch: 6099
 )
 ```
 

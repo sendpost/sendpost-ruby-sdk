@@ -17,7 +17,7 @@ All URIs are relative to *https://api.sendpost.io/api/v1*
 
 Create IPPool
 
-Creates a new IPPool with the specified name, IPs, and third-party sending providers.
+Create a new IP pool to organize your sending infrastructure. Pools group IPs and third-party sending providers (TPSPs) for intelligent routing.  **Pool Components:** - **IPs:** Dedicated IP addresses from your account - **TPSPs:** Third-party sending providers (SendGrid, Mailgun, etc.)  **TPSP Types:** | Value | Provider | |-------|----------| | `0` | Amazon SES | | `1` | SendGrid | | `2` | Mailgun | | `3` | Custom SMTP | | `4` | PostMark | | `5` | Gmail |  **Routing Strategies:** - `0` = Round Robin - Distribute traffic evenly - `1` = Email Provider - Route by recipient's mailbox provider - `2` = Volume Percentage - Split by defined percentages - `3` = Sending Domain - Route by your from domain  **Use Cases:** - Separate transactional from marketing emails - Route high-volume traffic through TPSPs - Implement provider-specific routing for deliverability - Create backup pools for failover  **Naming Best Practices:** - Use descriptive names: `Transactional_Orders`, `Marketing_Newsletter` - Include purpose: `HighPriority_Alerts`, `Bulk_Promotions` 
 
 ### Examples
 
@@ -33,7 +33,7 @@ Sendpost.configure do |config|
 end
 
 api_instance = Sendpost::IPPoolsApi.new
-ip_pool_create_request = Sendpost::IPPoolCreateRequest.new # IPPoolCreateRequest | 
+ip_pool_create_request = Sendpost::IPPoolCreateRequest.new({name: 'Marketing Promotional'}) # IPPoolCreateRequest | 
 
 begin
   # Create IPPool
@@ -88,16 +88,23 @@ end
 
 Delete IPPool
 
-Delete a specific IPPool based on its ID.
+Remove an IP pool from your account. This action is irreversible.  **⚠️ Before Deleting:** - Ensure no sub-accounts are actively using this pool - Update any sending configurations that reference this pool - IPs in the pool will become unassigned (not deleted)  **Note:** The default system pool cannot be deleted. 
 
 ### Examples
 
 ```ruby
 require 'time'
 require 'sendpost_ruby_sdk'
+# setup authorization
+Sendpost.configure do |config|
+  # Configure API key authorization: accountAuth
+  config.api_key['X-Account-ApiKey'] = 'YOUR API KEY'
+  # Uncomment the following line to set a prefix for the API key, e.g. 'Bearer' (defaults to nil)
+  # config.api_key_prefix['X-Account-ApiKey'] = 'Bearer'
+end
 
 api_instance = Sendpost::IPPoolsApi.new
-ippool_id = 756 # Integer | The ID of the IPPool to delete
+ippool_id = 756 # Integer | The unique ID of the IP pool to delete.
 
 begin
   # Delete IPPool
@@ -130,7 +137,7 @@ end
 
 | Name | Type | Description | Notes |
 | ---- | ---- | ----------- | ----- |
-| **ippool_id** | **Integer** | The ID of the IPPool to delete |  |
+| **ippool_id** | **Integer** | The unique ID of the IP pool to delete. |  |
 
 ### Return type
 
@@ -138,7 +145,7 @@ end
 
 ### Authorization
 
-No authorization required
+[accountAuth](../README.md#accountAuth)
 
 ### HTTP request headers
 
@@ -152,7 +159,7 @@ No authorization required
 
 List IPPools
 
-Retrieves a list of all IPPools and information about all IPs contained in that pool.
+Retrieve all IP pools configured for your account. IP pools group IPs and third-party sending providers (TPSPs) for intelligent traffic routing.  **Pool Types:** | Type | Value | Description | |------|-------|-------------| | Shared | `0` | Pool uses shared IPs (shared with other SendPost customers) | | Dedicated | `1` | Pool uses dedicated IPs (exclusive to your account) |  **Routing Strategies:** | Strategy | Value | Description | |----------|-------|-------------| | Round Robin | `0` | Distribute traffic evenly across pool members | | Email Provider | `1` | Route based on recipient's mailbox provider (Gmail, Yahoo, etc.) | | Volume Percentage | `2` | Split traffic by defined percentages | | Sending Domain | `3` | Route based on your sending domain |  **Use Cases:** - Audit your sending infrastructure configuration - View IPs and TPSPs in each pool - Plan routing strategy changes - Verify pool setup before sending campaigns 
 
 ### Examples
 
@@ -169,9 +176,9 @@ end
 
 api_instance = Sendpost::IPPoolsApi.new
 opts = {
-  limit: 10, # Integer | Number of records to return per request
-  offset: 0, # Integer | Number of initial records to skip
-  search: 'Transactional' # String | Case insensitive search against IPPool name
+  limit: 10, # Integer | Number of records to return per request. Default 20.
+  offset: 0, # Integer | Number of initial records to skip for pagination.
+  search: 'Transactional' # String | Case insensitive search against IP pool names.
 }
 
 begin
@@ -205,9 +212,9 @@ end
 
 | Name | Type | Description | Notes |
 | ---- | ---- | ----------- | ----- |
-| **limit** | **Integer** | Number of records to return per request | [optional] |
-| **offset** | **Integer** | Number of initial records to skip | [optional] |
-| **search** | **String** | Case insensitive search against IPPool name | [optional] |
+| **limit** | **Integer** | Number of records to return per request. Default 20. | [optional][default to 20] |
+| **offset** | **Integer** | Number of initial records to skip for pagination. | [optional][default to 0] |
+| **search** | **String** | Case insensitive search against IP pool names. | [optional] |
 
 ### Return type
 
@@ -229,7 +236,7 @@ end
 
 Get IPPool
 
-Retrieves details of a specific IPPool based on its ID.
+Retrieve complete details about a specific IP pool, including all IPs and TPSPs assigned to it.  **Response Includes:** - Pool name, ID, and creation date - Complete list of IPs with warmup status - All configured TPSPs with their settings - Current routing strategy and metadata - Warmup and monitoring configuration  **Use Cases:** - Verify pool configuration before sending - Check which IPs/TPSPs are in a pool - Debug routing issues - Audit pool settings for compliance 
 
 ### Examples
 
@@ -245,7 +252,7 @@ Sendpost.configure do |config|
 end
 
 api_instance = Sendpost::IPPoolsApi.new
-ippool_id = 74 # Integer | The ID of the IPPool whose information you want to retrieve
+ippool_id = 74 # Integer | The unique ID of the IP pool to retrieve.
 
 begin
   # Get IPPool
@@ -278,7 +285,7 @@ end
 
 | Name | Type | Description | Notes |
 | ---- | ---- | ----------- | ----- |
-| **ippool_id** | **Integer** | The ID of the IPPool whose information you want to retrieve |  |
+| **ippool_id** | **Integer** | The unique ID of the IP pool to retrieve. |  |
 
 ### Return type
 
@@ -300,7 +307,7 @@ end
 
 Update IPPool
 
-Update the details of an existing IPPool by its ID.
+Modify an existing IP pool's configuration, including name, IPs, TPSPs, and routing strategy.  **What Can Be Updated:** - Pool name - IP addresses assigned to the pool - Third-party sending providers (TPSPs) - Routing strategy and metadata - Warmup and monitoring settings  **Use Cases:** - Add new IPs to scale capacity - Remove underperforming IPs - Change routing strategy - Add/remove TPSP integrations - Rename pool for clarity  **Best Practices:** - Test routing changes during low-traffic periods - Ensure at least one sending option remains in the pool - Document changes for team awareness 
 
 ### Examples
 
@@ -310,7 +317,7 @@ require 'sendpost_ruby_sdk'
 
 api_instance = Sendpost::IPPoolsApi.new
 ip_pool_update_request = Sendpost::IPPoolUpdateRequest.new # IPPoolUpdateRequest | 
-ippool_id = 756 # Integer | The ID of the IPPool to update
+ippool_id = 756 # Integer | The unique ID of the IP pool to update.
 
 begin
   # Update IPPool
@@ -344,7 +351,7 @@ end
 | Name | Type | Description | Notes |
 | ---- | ---- | ----------- | ----- |
 | **ip_pool_update_request** | [**IPPoolUpdateRequest**](IPPoolUpdateRequest.md) |  |  |
-| **ippool_id** | **Integer** | The ID of the IPPool to update |  |
+| **ippool_id** | **Integer** | The unique ID of the IP pool to update. |  |
 
 ### Return type
 

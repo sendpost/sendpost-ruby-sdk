@@ -15,7 +15,7 @@ All URIs are relative to *https://api.sendpost.io/api/v1*
 
 Get Aggregate Stats
 
-Retrieves aggregated email stats for a specific sub-account for a date range.   **Note**: The maximum date range is 366 days. 
+Retrieve summarized email statistics for a sub-account over a date range. Unlike daily stats, this returns a single record with totals across all days—ideal for high-level reporting.  **Response includes total counts for:** - `processed` - Total emails submitted - `delivered` - Successfully delivered - `dropped` - Blocked before sending - `hardBounced` / `softBounced` - Bounce breakdowns - `opens` / `clicks` - Engagement totals - `unsubscribed` / `spams` - Negative signals  **Use Cases:** - Monthly performance reports - Executive dashboards - Billing period summaries - Year-over-year comparisons - SLA compliance reports  **Example:** To get Q1 2024 totals: ``` GET /account/subaccount/stat/11/aggregate?from=2024-01-01&to=2024-03-31 ```  **Note:** Maximum date range is 366 days (1 year). 
 
 ### Examples
 
@@ -31,9 +31,9 @@ Sendpost.configure do |config|
 end
 
 api_instance = Sendpost::StatsApi.new
-from = Date.parse('2013-10-20') # Date | Start date for stats retrieval.
-to = Date.parse('2013-10-20') # Date | Date to which stats should be retrieved ( Note than from date should be earlier than to date. Also the difference between from and to date shouldn't ne more than 60 days ) 
-subaccount_id = 11 # Integer | The ID of the subaccount to retrieve
+from = Date.parse('2024-01-01') # Date | Start date for aggregation (inclusive). Format YYYY-MM-DD.
+to = Date.parse('2024-03-31') # Date | End date for aggregation (inclusive). Max 366 days from `from` date.
+subaccount_id = 11 # Integer | The unique ID of the sub-account.
 
 begin
   # Get Aggregate Stats
@@ -66,9 +66,9 @@ end
 
 | Name | Type | Description | Notes |
 | ---- | ---- | ----------- | ----- |
-| **from** | **Date** | Start date for stats retrieval. |  |
-| **to** | **Date** | Date to which stats should be retrieved ( Note than from date should be earlier than to date. Also the difference between from and to date shouldn&#39;t ne more than 60 days )  |  |
-| **subaccount_id** | **Integer** | The ID of the subaccount to retrieve |  |
+| **from** | **Date** | Start date for aggregation (inclusive). Format YYYY-MM-DD. |  |
+| **to** | **Date** | End date for aggregation (inclusive). Max 366 days from &#x60;from&#x60; date. |  |
+| **subaccount_id** | **Integer** | The unique ID of the sub-account. |  |
 
 ### Return type
 
@@ -90,7 +90,7 @@ end
 
 List Stats
 
-Retrieves a list of email stats for a specific sub-account within a given date range. Both `from` and `to` dates are inclusive.   **Note**: The maximum date range is 31 days. 
+Retrieve daily email statistics for a specific sub-account. Returns one record per day within the date range, perfect for charting trends and identifying patterns.  **Metrics Per Day:** | Metric | Description | |--------|-------------| | `processed` | Emails submitted to SendPost | | `delivered` | Successfully delivered to recipient's mailbox | | `dropped` | Blocked before sending (suppressed, invalid, etc.) | | `hardBounced` | Permanent failures (invalid address, domain doesn't exist) | | `softBounced` | Temporary failures (mailbox full, server down) | | `opens` | Total email opens (includes multiple opens per recipient) | | `clicks` | Total link clicks | | `unsubscribed` | Recipients who unsubscribed | | `spams` | Emails marked as spam by recipients |  **Key Rates to Calculate:** - Delivery Rate = `delivered / processed × 100` - Open Rate = `opens / delivered × 100` - Click Rate = `clicks / delivered × 100` - Bounce Rate = `(hardBounced + softBounced) / processed × 100`  **Use Cases:** - Daily performance dashboard - Week-over-week trend analysis - Identifying delivery issues early - SLA monitoring and reporting  **Note:** Maximum date range is 31 days. Both `from` and `to` dates are inclusive. 
 
 ### Examples
 
@@ -106,9 +106,9 @@ Sendpost.configure do |config|
 end
 
 api_instance = Sendpost::StatsApi.new
-from = Date.parse('2013-10-20') # Date | Start date for stats retrieval.
-to = Date.parse('2013-10-20') # Date | Date to which stats should be retrieved ( Note than from date should be earlier than to date. Also the difference between from and to date shouldn't ne more than 60 days ) 
-subaccount_id = 11 # Integer | The ID of the subaccount to retrieve
+from = Date.parse('2024-01-01') # Date | Start date for stats retrieval (inclusive). Format YYYY-MM-DD.
+to = Date.parse('2024-01-31') # Date | End date for stats retrieval (inclusive). Must be after `from` date with max 31 days range.
+subaccount_id = 11 # Integer | The unique ID of the sub-account to retrieve stats for.
 
 begin
   # List Stats
@@ -141,9 +141,9 @@ end
 
 | Name | Type | Description | Notes |
 | ---- | ---- | ----------- | ----- |
-| **from** | **Date** | Start date for stats retrieval. |  |
-| **to** | **Date** | Date to which stats should be retrieved ( Note than from date should be earlier than to date. Also the difference between from and to date shouldn&#39;t ne more than 60 days )  |  |
-| **subaccount_id** | **Integer** | The ID of the subaccount to retrieve |  |
+| **from** | **Date** | Start date for stats retrieval (inclusive). Format YYYY-MM-DD. |  |
+| **to** | **Date** | End date for stats retrieval (inclusive). Must be after &#x60;from&#x60; date with max 31 days range. |  |
+| **subaccount_id** | **Integer** | The unique ID of the sub-account to retrieve stats for. |  |
 
 ### Return type
 
@@ -165,7 +165,7 @@ end
 
 Get Group Aggregate Stats
 
-Retrieves aggregated email stats for a specific group in a sub-account for the specified daterange. The maximum daterange for which these stats can be retrieved is 366 days. Ensure that the difference between the `from` and `to` dates does not exceed 366 days. 
+Retrieve aggregated email statistics filtered by a specific group/tag. Groups are labels you assign when sending emails to categorize and segment your analytics.  **What are Groups?** Groups (also called tags) are strings you attach to emails when sending. They help you: - Track different email types (transactional vs marketing) - Segment by campaign or feature - Compare performance across categories  **Setting Groups When Sending:** ```json {   \"from\": { \"email\": \"orders@shop.com\" },   \"to\": [{ \"email\": \"customer@example.com\" }],   \"subject\": \"Order Confirmation\",   \"groups\": [\"order-confirmations\", \"transactional\"] } ```  **Use Cases:** - Compare welcome email vs password reset performance - Track marketing campaign performance by campaign ID - Measure transactional vs promotional email metrics - Analyze A/B test results by variant group  **Example:** Get stats for \"welcome-emails\" group: ``` GET /account/subaccount/stat/11/group?group=welcome-emails&from=2024-01-01&to=2024-03-31 ```  **Note:** Maximum date range is 366 days. 
 
 ### Examples
 
@@ -181,8 +181,8 @@ Sendpost.configure do |config|
 end
 
 api_instance = Sendpost::StatsApi.new
-group = 'group_example' # String | Group whose aggregated stats need to be retrieved
-from = Date.parse('2013-10-20') # Date | The starting date for the aggregated stats
+group = 'order-confirmations' # String | The group/tag name to filter statistics by. Must match the group name used when sending emails.
+from = Date.parse('2024-01-01') # Date | Start date for aggregation (inclusive). Format YYYY-MM-DD.
 to = Date.parse('2013-10-20') # Date | The ending date for the aggregated stats (Note: `from` should be earlier than `to` and the date range should not exceed 366 days) 
 subaccount_id = 11 # Integer | The ID of the subaccount to retrieve
 
@@ -217,8 +217,8 @@ end
 
 | Name | Type | Description | Notes |
 | ---- | ---- | ----------- | ----- |
-| **group** | **String** | Group whose aggregated stats need to be retrieved |  |
-| **from** | **Date** | The starting date for the aggregated stats |  |
+| **group** | **String** | The group/tag name to filter statistics by. Must match the group name used when sending emails. |  |
+| **from** | **Date** | Start date for aggregation (inclusive). Format YYYY-MM-DD. |  |
 | **to** | **Date** | The ending date for the aggregated stats (Note: &#x60;from&#x60; should be earlier than &#x60;to&#x60; and the date range should not exceed 366 days)  |  |
 | **subaccount_id** | **Integer** | The ID of the subaccount to retrieve |  |
 

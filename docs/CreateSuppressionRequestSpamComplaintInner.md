@@ -12,7 +12,7 @@
 require 'sendpost_ruby_sdk'
 
 instance = Sendpost::CreateSuppressionRequestSpamComplaintInner.new(
-  email: gilfoyle@piedpiper.com
+  email: complained-user@example.com
 )
 ```
 

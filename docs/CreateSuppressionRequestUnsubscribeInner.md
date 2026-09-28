@@ -12,7 +12,7 @@
 require 'sendpost_ruby_sdk'
 
 instance = Sendpost::CreateSuppressionRequestUnsubscribeInner.new(
-  email: jared@piedpiper.com
+  email: opted-out-user@example.com
 )
 ```
 

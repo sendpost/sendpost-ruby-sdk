@@ -4,8 +4,8 @@
 
 | Name | Type | Description | Notes |
 | ---- | ---- | ----------- | ----- |
-| **id** | **Integer** | ID of the deleted domain. | [optional] |
-| **message** | **String** | Success message. | [optional] |
+| **id** | **Integer** | ID of the deleted resource | [optional] |
+| **message** | **String** | Human-readable confirmation message | [optional] |
 
 ## Example
 
@@ -13,8 +13,8 @@
 require 'sendpost_ruby_sdk'
 
 instance = Sendpost::DeleteResponse.new(
-  id: null,
-  message: null
+  id: 117,
+  message: Resource has been deleted successfully
 )
 ```
 

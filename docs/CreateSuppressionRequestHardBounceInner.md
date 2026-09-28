@@ -12,7 +12,7 @@
 require 'sendpost_ruby_sdk'
 
 instance = Sendpost::CreateSuppressionRequestHardBounceInner.new(
-  email: jackbarker@hooli.com
+  email: invalid-user@deleted-domain.com
 )
 ```
 

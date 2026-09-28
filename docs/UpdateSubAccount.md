@@ -4,7 +4,7 @@
 
 | Name | Type | Description | Notes |
 | ---- | ---- | ----------- | ----- |
-| **name** | **String** | New name for the sub-account. | [optional] |
+| **name** | **String** | New display name for the sub-account | [optional] |
 
 ## Example
 
@@ -12,7 +12,7 @@
 require 'sendpost_ruby_sdk'
 
 instance = Sendpost::UpdateSubAccount.new(
-  name: FoxHole V1
+  name: Marketing - Production v2
 )
 ```
 

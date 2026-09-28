@@ -4,8 +4,8 @@
 
 | Name | Type | Description | Notes |
 | ---- | ---- | ----------- | ----- |
-| **id** | **Integer** | Unique ID for the deleted sub-account. | [optional] |
-| **message** | **String** | Message confirming the deletion. | [optional] |
+| **id** | **Integer** | ID of the deleted sub-account | [optional] |
+| **message** | **String** | Confirmation message | [optional] |
 
 ## Example
 
@@ -13,8 +13,8 @@
 require 'sendpost_ruby_sdk'
 
 instance = Sendpost::DeleteSubAccountResponse.new(
-  id: 12,
-  message: Sub-Account (FoxHole V1) has been deleted successfully.
+  id: 50442,
+  message: Sub-Account (Marketing - Production) has been deleted successfully
 )
 ```
 

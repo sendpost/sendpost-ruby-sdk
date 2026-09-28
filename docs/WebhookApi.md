@@ -13,11 +13,11 @@ All URIs are relative to *https://api.sendpost.io/api/v1*
 
 ## create_webhook
 
-> <Webhook> create_webhook(create_webhook_request)
+> <Webhook> create_webhook(new_webhook)
 
 Create Webhook
 
-Create a new webhook by specifying its properties.
+Create a new webhook to receive real-time notifications for email events. Your endpoint will receive HTTP POST requests with event data as they occur.  **Endpoint Requirements:** - Must be publicly accessible HTTPS URL - Should return 2xx status within 30 seconds - Handle potential duplicate events (use event ID for deduplication) - Implement retry/queue logic for reliability  **Choosing Events:** - **Engagement Tracking:** `uniqueOpened`, `uniqueClicked` for metrics - **Full History:** `opened`, `clicked` for complete event logs - **Delivery Monitoring:** `delivered`, `hardBounced`, `softBounced` - **Compliance:** `unsubscribed`, `spam`  **Best Practices:** - Only enable events you actually need - Store events before processing (async processing) - Implement idempotency using event IDs - Set up monitoring for webhook failures  **Webhook Payload Example:** ```json {   \"eventId\": \"evt_123\",   \"event\": \"delivered\",   \"messageId\": \"msg_456\",   \"recipient\": \"user@example.com\",   \"timestamp\": \"2024-01-15T10:30:00Z\" } ``` 
 
 ### Examples
 
@@ -33,11 +33,11 @@ Sendpost.configure do |config|
 end
 
 api_instance = Sendpost::WebhookApi.new
-create_webhook_request = Sendpost::CreateWebhookRequest.new # CreateWebhookRequest | 
+new_webhook = Sendpost::NewWebhook.new({url: 'https://app.hooli.com/api/webhooks/sendpost'}) # NewWebhook | 
 
 begin
   # Create Webhook
-  result = api_instance.create_webhook(create_webhook_request)
+  result = api_instance.create_webhook(new_webhook)
   p result
 rescue Sendpost::ApiError => e
   puts "Error when calling WebhookApi->create_webhook: #{e}"
@@ -48,12 +48,12 @@ end
 
 This returns an Array which contains the response data, status code and headers.
 
-> <Array(<Webhook>, Integer, Hash)> create_webhook_with_http_info(create_webhook_request)
+> <Array(<Webhook>, Integer, Hash)> create_webhook_with_http_info(new_webhook)
 
 ```ruby
 begin
   # Create Webhook
-  data, status_code, headers = api_instance.create_webhook_with_http_info(create_webhook_request)
+  data, status_code, headers = api_instance.create_webhook_with_http_info(new_webhook)
   p status_code # => 2xx
   p headers # => { ... }
   p data # => <Webhook>
@@ -66,7 +66,7 @@ end
 
 | Name | Type | Description | Notes |
 | ---- | ---- | ----------- | ----- |
-| **create_webhook_request** | [**CreateWebhookRequest**](CreateWebhookRequest.md) |  |  |
+| **new_webhook** | [**NewWebhook**](NewWebhook.md) |  |  |
 
 ### Return type
 
@@ -88,7 +88,7 @@ end
 
 Delete Webhook
 
-Delete a webhook by its ID.
+Remove a webhook from your account. After deletion, no further events will be sent to that endpoint.  **Before Deleting:** - Ensure your application doesn't rely on these events - Consider updating to a new webhook instead if you're migrating  **Note:** Events that occurred before deletion are not affected. Historical data remains intact. 
 
 ### Examples
 
@@ -104,7 +104,7 @@ Sendpost.configure do |config|
 end
 
 api_instance = Sendpost::WebhookApi.new
-webhook_id = 117 # Integer | ID of the webhook to delete.
+webhook_id = 117 # Integer | The unique ID of the webhook to delete.
 
 begin
   # Delete Webhook
@@ -137,7 +137,7 @@ end
 
 | Name | Type | Description | Notes |
 | ---- | ---- | ----------- | ----- |
-| **webhook_id** | **Integer** | ID of the webhook to delete. |  |
+| **webhook_id** | **Integer** | The unique ID of the webhook to delete. |  |
 
 ### Return type
 
@@ -155,11 +155,11 @@ end
 
 ## get_all_webhooks
 
-> <Array<Webhook>> get_all_webhooks(opts)
+> <Array<AccountWebhookWithStats>> get_all_webhooks(opts)
 
 List Webhooks
 
-Retrieves a list of all webhooks, their endpoints, and the events for which they are active.
+Retrieve all configured webhooks for your account. Webhooks enable real-time notifications when email events occur, allowing you to build reactive applications.  **Supported Events:** | Event | Description | |-------|-------------| | `processed` | Email accepted and queued for delivery | | `dropped` | Email blocked (suppressed, invalid, policy) | | `delivered` | Email successfully delivered to recipient | | `hardBounced` | Permanent delivery failure | | `softBounced` | Temporary delivery failure | | `opened` | Recipient opened the email (all opens) | | `uniqueOpened` | First open per recipient only | | `clicked` | Recipient clicked a link (all clicks) | | `uniqueClicked` | First click per recipient only | | `unsubscribed` | Recipient unsubscribed | | `spam` | Recipient marked email as spam |  **Use Cases:** - Audit configured webhook endpoints - Verify webhook URLs are correct - Review enabled events per webhook - Debug webhook delivery issues 
 
 ### Examples
 
@@ -176,9 +176,9 @@ end
 
 api_instance = Sendpost::WebhookApi.new
 opts = {
-  limit: 10, # Integer | Number of records to return per request.
-  offset: 0, # Integer | Number of initial records to skip.
-  search: 'hooli' # String | Case insensitive search against webhook URL.
+  limit: 10, # Integer | Number of records to return per request. Default 20.
+  offset: 0, # Integer | Number of initial records to skip for pagination.
+  search: 'api.yoursite.com' # String | Case insensitive search against webhook URLs.
 }
 
 begin
@@ -194,7 +194,7 @@ end
 
 This returns an Array which contains the response data, status code and headers.
 
-> <Array(<Array<Webhook>>, Integer, Hash)> get_all_webhooks_with_http_info(opts)
+> <Array(<Array<AccountWebhookWithStats>>, Integer, Hash)> get_all_webhooks_with_http_info(opts)
 
 ```ruby
 begin
@@ -202,7 +202,7 @@ begin
   data, status_code, headers = api_instance.get_all_webhooks_with_http_info(opts)
   p status_code # => 2xx
   p headers # => { ... }
-  p data # => <Array<Webhook>>
+  p data # => <Array<AccountWebhookWithStats>>
 rescue Sendpost::ApiError => e
   puts "Error when calling WebhookApi->get_all_webhooks_with_http_info: #{e}"
 end
@@ -212,13 +212,13 @@ end
 
 | Name | Type | Description | Notes |
 | ---- | ---- | ----------- | ----- |
-| **limit** | **Integer** | Number of records to return per request. | [optional] |
-| **offset** | **Integer** | Number of initial records to skip. | [optional] |
-| **search** | **String** | Case insensitive search against webhook URL. | [optional] |
+| **limit** | **Integer** | Number of records to return per request. Default 20. | [optional][default to 20] |
+| **offset** | **Integer** | Number of initial records to skip for pagination. | [optional][default to 0] |
+| **search** | **String** | Case insensitive search against webhook URLs. | [optional] |
 
 ### Return type
 
-[**Array&lt;Webhook&gt;**](Webhook.md)
+[**Array&lt;AccountWebhookWithStats&gt;**](AccountWebhookWithStats.md)
 
 ### Authorization
 
@@ -236,7 +236,7 @@ end
 
 Get Webhook
 
-Retrieves a specific webhook based on its ID.
+Retrieve detailed information about a specific webhook, including its endpoint URL and enabled events.  **Use Cases:** - Verify webhook configuration - Debug event delivery issues - Check enabled events for a webhook - Audit webhook settings 
 
 ### Examples
 
@@ -252,7 +252,7 @@ Sendpost.configure do |config|
 end
 
 api_instance = Sendpost::WebhookApi.new
-webhook_id = 117 # Integer | The ID of the webhook to retrieve.
+webhook_id = 117 # Integer | The unique ID of the webhook to retrieve.
 
 begin
   # Get Webhook
@@ -285,7 +285,7 @@ end
 
 | Name | Type | Description | Notes |
 | ---- | ---- | ----------- | ----- |
-| **webhook_id** | **Integer** | The ID of the webhook to retrieve. |  |
+| **webhook_id** | **Integer** | The unique ID of the webhook to retrieve. |  |
 
 ### Return type
 
@@ -307,7 +307,7 @@ end
 
 Update Webhook
 
-Update the properties of an existing webhook.
+Modify an existing webhook's configuration. Use this to change the endpoint URL or update which events trigger notifications.  **What Can Be Updated:** - Webhook endpoint URL - Enabled/disabled events - Event-specific settings  **Use Cases:** - Migrate to a new endpoint URL - Enable additional events as needs grow - Disable events to reduce traffic - Update after infrastructure changes 
 
 ### Examples
 
@@ -323,8 +323,8 @@ Sendpost.configure do |config|
 end
 
 api_instance = Sendpost::WebhookApi.new
-update_webhook = Sendpost::UpdateWebhook.new # UpdateWebhook | 
-webhook_id = 117 # Integer | ID of the webhook to update.
+update_webhook = Sendpost::UpdateWebhook.new({url: 'https://app.hooli.com/api/webhooks/sendpost'}) # UpdateWebhook | 
+webhook_id = 117 # Integer | The unique ID of the webhook to update.
 
 begin
   # Update Webhook
@@ -358,7 +358,7 @@ end
 | Name | Type | Description | Notes |
 | ---- | ---- | ----------- | ----- |
 | **update_webhook** | [**UpdateWebhook**](UpdateWebhook.md) |  |  |
-| **webhook_id** | **Integer** | ID of the webhook to update. |  |
+| **webhook_id** | **Integer** | The unique ID of the webhook to update. |  |
 
 ### Return type
 

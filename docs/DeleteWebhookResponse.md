@@ -4,8 +4,8 @@
 
 | Name | Type | Description | Notes |
 | ---- | ---- | ----------- | ----- |
-| **id** | **Integer** | Unique ID of the deleted webhook. | [optional] |
-| **message** | **String** | Success message. | [optional] |
+| **id** | **Integer** | ID of the deleted webhook | [optional] |
+| **message** | **String** | Confirmation message | [optional] |
 
 ## Example
 
@@ -14,7 +14,7 @@ require 'sendpost_ruby_sdk'
 
 instance = Sendpost::DeleteWebhookResponse.new(
   id: 117,
-  message: Webhook (https://app.hooli.com/email/webhook) has been deleted successfully.
+  message: Webhook (https://app.hooli.com/api/webhooks/sendpost) has been deleted successfully
 )
 ```
 

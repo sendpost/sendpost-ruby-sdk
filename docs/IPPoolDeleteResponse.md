@@ -4,8 +4,8 @@
 
 | Name | Type | Description | Notes |
 | ---- | ---- | ----------- | ----- |
-| **id** | **Integer** |  | [optional] |
-| **message** | **String** |  | [optional] |
+| **id** | **Integer** | ID of the deleted IP pool | [optional] |
+| **message** | **String** | Confirmation message | [optional] |
 
 ## Example
 

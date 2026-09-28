@@ -1,671 +1,752 @@
-# SendPost Ruby SDK
+# sendpost_ruby_sdk
 
-A Ruby gem for sending emails and managing your SendPost account programmatically.
+Sendpost - the Ruby gem for the SendPost API
 
-## What is SendPost?
+# Introduction
 
-SendPost is an email delivery service that helps you send transactional and marketing emails reliably. With SendPost, you can:
+> ### 📌 API versioning & the v1 response contract
+>
+> This reference documents the **v1 response contract** — the stable, camelCase
+> response shape that SendPost commits to. This is the shape you should build against.
+>
+> **During the current deprecation window**, requests authenticated with an account
+> or sub-account API key receive the **legacy** response shape by default, so existing
+> integrations keep working unchanged. To receive the documented v1 shape today, send:
+>
+> ```
+> X-SendPost-Public-Contract: v1
+> ```
+>
+> **How to tell which shape you got.** Every public response echoes the applied
+> contract in the `X-SendPost-Public-Contract` response header. While the legacy
+> shape is being served, responses also carry standard deprecation signals:
+> `Deprecation: true`, a `Sunset` header with the exact cut-over date, and a
+> `Link: <...>; rel=\"deprecation\"` header pointing at the migration guide. **Read the
+> `Sunset` header for the authoritative end date** rather than hardcoding one.
+>
+> **After the sunset date**, v1 becomes the default and the legacy shape is no longer
+> served. New integrations should send `X-SendPost-Public-Contract: v1` now and rely on
+> the shapes in this reference.
 
-- Send personalized emails to multiple recipients
-- Track email opens and link clicks
-- Monitor email statistics (deliveries, bounces, spam complaints)
-- Manage multiple sending domains and IP addresses
-- Set up webhooks to receive real-time email event notifications
+SendPost provides email API and SMTP relay which can be used not just to send & measure but also alert & optimised email sending.
+
+You can use SendPost to:
+
+* Send personalised emails to multiple recipients using email API 
+
+* Track opens and clicks
+
+* Analyse statistics around open, clicks, bounce, unsubscribe and spam 
+
+
+At and advanced level you can use it to:
+
+* Manage multiple sub-accounts which may map to your promotional or transactional sending, multiple product lines or multiple customers 
+
+* Classify your emails using groups for better analysis
+
+* Analyse and fix email sending at sub-account level, IP Pool level or group level
+
+* Have automated alerts to notify disruptions regarding email sending
+
+* Manage different dedicated IP Pools so to better control your email sending
+
+* Automatically know when IP or domain is blacklisted or sender score is down
+
+* Leverage pro deliverability tools to get significantly better email deliverability & inboxing
+
+
+[<img src=\"https://run.pstmn.io/button.svg\" alt=\"Run In Postman\" style=\"width: 128px; height: 32px;\">](https://god.gw.postman.com/run-collection/33476323-e6dbd27f-c4a7-4d49-bcac-94b0611b938b?action=collection%2Ffork&source=rip_markdown&collection-url=entityId%3D33476323-e6dbd27f-c4a7-4d49-bcac-94b0611b938b%26entityType%3Dcollection%26workspaceId%3D6b1e4f65-96a9-4136-9512-6266c852517e) 
+
+# Overview
+
+## REST API
+
+SendPost API is built on REST API principles. Authenticated users can interact with any of the API endpoints to perform:
+
+* **GET**- to get a resource
+
+* **POST** - to create a resource
+
+* **PUT** - to update an existing resource
+
+* **DELETE** - to delete a resource
+
+
+The API endpoint for all API calls is:
+<code>https://api.sendpost.io/api/v1</code>
+
+
+Some conventions that have been followed in the API design overall are following:
+
+
+* All resources have either <code>/api/v1/subaccount</code> or <code>/api/v1/account</code> in their API call resource path based on who is authorised for the resource. All API calls with path <code>/api/v1/subaccount</code> use <code>X-SubAccount-ApiKey</code> in their request header. Likewise all API calls with path <code>/api/v1/account</code> use <code>X-Account-ApiKey</code> in their request header.
+
+* All resource endpoints end with singular name and not plural. So we have <code>domain</code> instead of domains for domain resource endpoint. Likewise we have <code>sender</code> instead of senders for sender resource endpoint.
+
+* Body submitted for POST / PUT API calls as well as JSON response from SendPost API follow camelcase convention
+
+* All timestamps returned in response (created or submittedAt response fields) are UNIX nano epoch timestamp.
+
+
+<aside class=\"success\">
+All resources have either <code>/api/v1/subaccount</code> or <code>/api/v1/account</code> in their API call resource path based on who is authorised for the resource. All API calls with path <code>/api/v1/subaccount</code> use <code>X-SubAccount-ApiKey</code> in their request header. Likewise all API calls with path <code>/api/v1/account</code> use <code>X-Account-ApiKey</code> in their request header.
+</aside>
+
+
+SendPost uses conventional HTTP response codes to indicate the success or failure of an API request. 
+
+
+* Codes in the <code>2xx</code> range indicate success. 
+
+* Codes in the <code>4xx</code> range indicate an error owing due to unauthorize access, incorrect request parameters or body etc.
+
+* Code in the <code>5xx</code> range indicate an eror with SendPost's servers ( internal service issue or maintenance )
+
+
+<aside class=\"info\">
+SendPost all responses return <code>created</code> in UNIX nano epoch timestamp. 
+</aside>
+
+
+## Authentication
+
+SendPost uses API keys for authentication. You can register a new SendPost API key at our [developer portal](https://app.sendpost.io/register).
+
+
+SendPost expects the API key to be included in all API requests to the server in a header that looks like the following:
+
+
+`X-SubAccount-ApiKey: AHEZEP8192SEGH`
+
+
+This API key is used for all Sub-Account level operations such as:
+
+* Sending emails
+
+* Retrieving stats regarding open, click, bounce, unsubscribe and spam
+
+* Uploading suppressions list
+
+* Verifying sending domains
+and more
+
+In addition to <code>X-SubAccount-ApiKey</code> you also have another API Key <code>X-Account-APIKey</code> which is used for Account level operations such as :
+
+* Creating and managing sub-accounts
+
+* Allocating IPs for your account
+
+* Getting overall billing and usage information
+
+* Email List validation
+
+* Creating and managing alerts
+and more
+
+
+<aside class=\"notice\">
+You must look at individual API reference page to look at whether <code>X-SubAccount-ApiKey</code> is required or <code>X-Account-ApiKey</code>
+</aside>
+
+
+In case an incorrect API Key header is specified or if it is missed you will get HTTP Response 401 ( Unauthorized ) response from SendPost.
+
+
+## HTTP Response Headers
+
+
+Code           | Reason                 | Details
+---------------| -----------------------| -----------
+200            | Success                | Everything went well
+401            | Unauthorized           | Incorrect or missing API header either <code>X-SubAccount-ApiKey</code> or <code>X-Account-ApiKey</code>
+403            | Forbidden              | Typically sent when resource with same name or details already exist
+406            | Missing resource id    | Resource id specified is either missing or doesn't exist
+422            | Unprocessable entity   | Request body is not in proper format
+500            | Internal server error  | Some error happened at SendPost while processing API request
+503            | Service Unavailable    | SendPost is offline for maintenance. Please try again later
+
+# API SDKs
+
+We have native SendPost SDKs in the following programming languages. You can integrate with them or create your own SDK with our API specification. In case you need any assistance with respect to API then do reachout to our team from website chat or email us at **hello@sendpost.io**
+
+
+* [PHP](https://github.com/sendpost/sendpost_php_sdk)
+
+* [Javascript](https://github.com/sendpost/sendpost_javascript_sdk)
+
+* [Ruby](https://github.com/sendpost/sendpost_ruby_sdk)
+
+* [Python](https://github.com/sendpost/sendpost_python_sdk)
+
+* [Golang](https://github.com/sendpost/sendpost_go_sdk)
+
+
+# API Reference
+
+SendX REST API can be broken down into two major sub-sections:
+
+
+* Sub-Account
+
+* Account 
+
+
+Sub-Account API operations enable common email sending API use-cases like sending bulk email, adding new domains or senders for email sending programmatically, retrieving stats, adding suppressions etc. All Sub-Account API operations need to pass <code>X-SubAccount-ApiKey</code> header with every API call.
+
+
+The Account API operations allow users to manage multiple sub-accounts and manage IPs. A single parent SendPost account can have 100's of sub-accounts. You may want to create sub-accounts for different products your company is running or to segregate types of emails or for managing email sending across multiple customers of yours.
+
+
+# SMTP Reference
+
+Simple Mail Transfer Protocol (SMTP) is a quick and easy way to send email from one server to another. SendPost provides an SMTP service that allows you to deliver your email via our servers instead of your own client or server. 
+This means you can count on SendPost's delivery at scale for your SMTP needs. 
+
+
+## Integrating SMTP 
+
+
+1. Get the SMTP `username` and `password` from your SendPost account.
+
+2. Set the server host in your email client or application to `smtp.sendpost.io`. This setting is sometimes referred to as the external SMTP server or the SMTP relay.
+
+3. Set the `username` and `password`.
+
+4. Set the port to `587` (or as specified below).
+
+## SMTP Ports
+
+
+- For an unencrypted or a TLS connection, use port `25`, `2525` or `587`.
+
+- For a SSL connection, use port `465`
+
+- Check your firewall and network to ensure they're not blocking any of our SMTP Endpoints.
+
+
+SendPost supports STARTTLS for establishing a TLS-encrypted connection. STARTTLS is a means of upgrading an unencrypted connection to an encrypted connection. There are versions of STARTTLS for a variety of protocols; the SMTP version is defined in [RFC 3207](https://www.ietf.org/rfc/rfc3207.txt).
+
+
+To set up a STARTTLS connection, the SMTP client connects to the SendPost SMTP endpoint `smtp.sendpost.io` on port 25, 587, or 2525, issues an EHLO command, and waits for the server to announce that it supports the STARTTLS SMTP extension. The client then issues the STARTTLS command, initiating TLS negotiation. When negotiation is complete, the client issues an EHLO command over the new encrypted connection, and the SMTP session proceeds normally.
+
+
+<aside class=\"success\">
+If you are unsure which port to use, a TLS connection on port 587 is typically recommended.
+</aside>
+
+
+## Sending email from your application
+
+
+```javascript
+\"use strict\";
+
+const nodemailer = require(\"nodemailer\");
+
+async function main() {
+// create reusable transporter object using the default SMTP transport
+let transporter = nodemailer.createTransport({
+host: \"smtp.sendpost.io\",
+port: 587,
+secure: false, // true for 465, false for other ports
+auth: {
+user:  \"<username>\" , // generated ethereal user
+pass: \"<password>\", // generated ethereal password
+},
+requireTLS: true,
+debug: true,
+logger: true,
+});
+
+// send mail with defined transport object
+try {
+let info = await transporter.sendMail({
+from: 'erlich@piedpiper.com',
+to: 'gilfoyle@piedpiper.com',
+subject: 'Test Email Subject',
+html: '<h1>Hello Geeks!!!</h1>',
+});
+console.log(\"Message sent: %s\", info.messageId);
+} catch (e) {
+console.log(e)
+}
+}
+
+main().catch(console.error);
+```
+
+For PHP
+
+
+```php
+<?php
+// Import PHPMailer classes into the global namespace
+use PHPMailer\\PHPMailer\\PHPMailer;
+use PHPMailer\\PHPMailer\\SMTP;
+use PHPMailer\\PHPMailer\\Exception;
+
+// Load Composer's autoloader
+require 'vendor/autoload.php';
+
+$mail = new PHPMailer(true);
+
+// Settings
+try {
+$mail->SMTPDebug = SMTP::DEBUG_CONNECTION;                  // Enable verbose debug output
+$mail->isSMTP();                                            // Send using SMTP
+$mail->Host       = 'smtp.sendpost.io';                     // Set the SMTP server to send through
+$mail->SMTPAuth   = true;                                   // Enable SMTP authentication
+$mail->Username   = '<username>';                           // SMTP username
+$mail->Password   = '<password>';                           // SMTP password
+$mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;         // Enable implicit TLS encryption
+$mail->Port       = 587;                                    // TCP port to connect to; use 587 if you have set `SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS`
+
+//Recipients
+$mail->setFrom('erlich@piedpiper.com', 'Erlich');
+$mail->addAddress('gilfoyle@piedpiper.com', 'Gilfoyle');
+
+//Content
+$mail->isHTML(true);                                  //Set email format to HTML
+$mail->Subject = 'Here is the subject';
+$mail->Body    = 'This is the HTML message body <b>in bold!</b>';
+$mail->AltBody = 'This is the body in plain text for non-HTML mail clients';
+
+$mail->send();
+echo 'Message has been sent';
+
+} catch (Exception $e) {
+echo \"Message could not be sent. Mailer Error: {$mail->ErrorInfo}\";
+}
+```
+For Python
+```python
+#!/usr/bin/python3
+
+import sys
+import os
+import re
+
+from smtplib import SMTP
+import ssl
+
+from email.mime.text import MIMEText
+
+SMTPserver = 'smtp.sendpost.io'
+PORT = 587
+sender =     'erlich@piedpiper.com'
+destination = ['gilfoyle@piedpiper.com']
+
+USERNAME = \"<username>\"
+PASSWORD = \"<password>\"
+
+# typical values for text_subtype are plain, html, xml
+text_subtype = 'plain'
+
+content=\"\"\"\\
+Test message
+\"\"\"
+
+subject=\"Sent from Python\"
+
+try:
+msg = MIMEText(content, text_subtype)
+msg['Subject']= subject
+msg['From']   = sender
+
+conn = SMTP(SMTPserver, PORT)
+conn.ehlo()
+context = ssl.create_default_context()
+conn.starttls(context=context)  # upgrade to tls
+conn.ehlo()
+conn.set_debuglevel(True)
+conn.login(USERNAME, PASSWORD)
+
+try:
+resp = conn.sendmail(sender, destination, msg.as_string())
+print(\"Send Mail Response: \", resp)
+except Exception as e:
+print(\"Send Email Error: \", e)
+finally:
+conn.quit()
+
+except Exception as e:
+print(\"Error:\", e)
+```
+For Golang
+```go
+package main
+
+import (
+\"fmt\"
+\"net/smtp\"
+\"os\"
+)
+
+// Sending Email Using Smtp in Golang
+
+func main() {
+
+username := \"<username>\"
+password := \"<password>\"
+
+from := \"erlich@piedpiper.com\"
+toList := []string{\"gilfoyle@piedpiper.com\"}
+host := \"smtp.sendpost.io\"
+port := \"587\" // recommended
+
+// This is the message to send in the mail
+msg := \"Hello geeks!!!\"
+
+// We can't send strings directly in mail,
+// strings need to be converted into slice bytes
+body := []byte(msg)
+
+// PlainAuth uses the given username and password to
+// authenticate to host and act as identity.
+// Usually identity should be the empty string,
+// to act as username.
+auth := smtp.PlainAuth(\"\", username, password, host)
+
+// SendMail uses TLS connection to send the mail
+// The email is sent to all address in the toList,
+// the body should be of type bytes, not strings
+// This returns error if any occured.
+err := smtp.SendMail(host+\":\"+port, auth, from, toList, body)
+
+// handling the errors
+if err != nil {
+fmt.Println(err)
+os.Exit(1)
+}
+
+fmt.Println(\"Successfully sent mail to all user in toList\")
+}
+
+```
+For Java
+```java
+// implementation 'com.sun.mail:javax.mail:1.6.2'
+
+import java.util.Properties;
+
+import javax.mail.Message;
+import javax.mail.Session;
+import javax.mail.Transport;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeMessage;
+
+public class SMTPConnect {
+
+// This address must be verified.
+static final String FROM = \"erlich@piedpiper.com\";
+static final String FROMNAME = \"Erlich Bachman\";
+
+// Replace recipient@example.com with a \"To\" address. If your account
+// is still in the sandbox, this address must be verified.
+static final String TO = \"gilfoyle@piedpiper.com\";
+
+// Replace smtp_username with your SendPost SMTP user name.
+static final String SMTP_USERNAME = \"<username>\";
+
+// Replace smtp_password with your SendPost SMTP password.
+static final String SMTP_PASSWORD = \"<password>\";
+
+// SMTP Host Name
+static final String HOST = \"smtp.sendpost.io\";
+
+// The port you will connect to on SendPost SMTP Endpoint.
+static final int PORT = 587;
+
+static final String SUBJECT = \"SendPost SMTP Test (SMTP interface accessed using Java)\";
+
+static final String BODY = String.join(
+System.getProperty(\"line.separator\"),
+\"<h1>SendPost SMTP Test</h1>\",
+\"<p>This email was sent with SendPost using the \",
+\"<a href='https://github.com/eclipse-ee4j/mail'>Javamail Package</a>\",
+\" for <a href='https://www.java.com'>Java</a>.\"
+);
+
+public static void main(String[] args) throws Exception {
+
+// Create a Properties object to contain connection configuration information.
+Properties props = System.getProperties();
+props.put(\"mail.transport.protocol\", \"smtp\");
+props.put(\"mail.smtp.port\", PORT);
+props.put(\"mail.smtp.starttls.enable\", \"true\");
+props.put(\"mail.smtp.debug\", \"true\");
+props.put(\"mail.smtp.auth\", \"true\");
+
+// Create a Session object to represent a mail session with the specified properties.
+Session session = Session.getDefaultInstance(props);
+
+// Create a message with the specified information.
+MimeMessage msg = new MimeMessage(session);
+msg.setFrom(new InternetAddress(FROM,FROMNAME));
+msg.setRecipient(Message.RecipientType.TO, new InternetAddress(TO));
+msg.setSubject(SUBJECT);
+msg.setContent(BODY,\"text/html\");
+
+// Create a transport.
+Transport transport = session.getTransport();
+
+// Send the message.
+try {
+System.out.println(\"Sending...\");
+
+// Connect to SendPost SMTP using the SMTP username and password you specified above.
+transport.connect(HOST, SMTP_USERNAME, SMTP_PASSWORD);
+
+// Send the email.
+transport.sendMessage(msg, msg.getAllRecipients());
+System.out.println(\"Email sent!\");
+
+} catch (Exception ex) {
+
+System.out.println(\"The email was not sent.\");
+System.out.println(\"Error message: \" + ex.getMessage());
+System.out.println(ex);
+}
+// Close and terminate the connection.
+}
+}
+```
+
+Many programming languages support sending email using SMTP. This capability might be built into the programming language itself, or it might be available as an add-on, plug-in, or library. You can take advantage of this capability by sending email through SendPost from within application programs that you write.
+
+We have provided examples in Python3, Golang, Java, PHP, JS.
+
+# API Contract Versioning (Public REST)
+
+The public REST API uses a versioned response contract so field changes stay non-breaking:
+
+* Send `X-SendPost-Public-Contract: v1` to opt into the current v1 response shape, or `legacy` for the pre-v1 shape. If the header is omitted, the applied contract is policy-driven — `legacy` before the published sunset date, `v1` after it.
+* Every response echoes `X-SendPost-Public-Contract: <applied>`. When the `legacy` contract is served, responses also include `Deprecation: true`, `Sunset: <RFC1123 date>`, and `Link: <doc-url>; rel=\"deprecation\"`.
+* Migrate to `v1` before the sunset date. Notable legacy → v1 field changes: Suppression `smtp_error` → `smtpError`, Stat `email_type` → `emailType`.
+
+> `X-SendPost-Private-Api: true` is an internal header used only by the SendPost dashboard to receive richer internal objects. It is not part of the public SDK contract and should not be set by API integrations.
+
+
+This SDK is automatically generated by the [OpenAPI Generator](https://openapi-generator.tech) project:
+
+- API version: 1.3.0
+- Package version: 3.0.0
+- Generator version: 7.13.0
+- Build package: org.openapitools.codegen.languages.RubyClientCodegen
 
 ## Installation
 
-### Install from RubyGems (Recommended)
+### Build a gem
 
-```bash
-gem install sendpost_ruby_sdk
-```
+To build the Ruby code into a gem:
 
-### Install from Source
-
-If you're installing from the source code:
-
-```bash
+```shell
 gem build sendpost_ruby_sdk.gemspec
-gem install ./sendpost_ruby_sdk-2.0.0.gem
 ```
 
-### Add to Your Gemfile
+Then either install the gem locally:
 
-Add this line to your application's `Gemfile`:
+```shell
+gem install ./sendpost_ruby_sdk-3.0.0.gem
+```
+
+(for development, run `gem install --dev ./sendpost_ruby_sdk-3.0.0.gem` to install the development dependencies)
+
+or publish the gem to a gem hosting service, e.g. [RubyGems](https://rubygems.org/).
+
+Finally add this to the Gemfile:
+
+    gem 'sendpost_ruby_sdk', '~> 3.0.0'
+
+### Install from Git
+
+If the Ruby gem is hosted at a git repository: https://github.com/sendpost/sendpost-ruby-sdk, then add the following in the Gemfile:
+
+    gem 'sendpost_ruby_sdk', :git => 'https://github.com/sendpost/sendpost-ruby-sdk.git'
+
+### Include the Ruby code directly
+
+Include the Ruby code directly using `-I` as follows:
+
+```shell
+ruby -Ilib script.rb
+```
+
+## Getting Started
+
+Please follow the [installation](#installation) procedure and then run the following code:
 
 ```ruby
-gem 'sendpost_ruby_sdk', '~> 2.0.0'
-```
-
-Then run:
-
-```bash
-bundle install
-```
-
-## Quick Start
-
-### 1. Get Your API Keys
-
-Before you can use the SDK, you need API keys from SendPost:
-
-1. Sign up at [https://app.sendpost.io/register](https://app.sendpost.io/register)
-2. Log in to your SendPost dashboard
-3. Navigate to API Keys section
-4. Copy your **Sub-Account API Key** (for sending emails)
-5. Copy your **Account API Key** (for managing sub-accounts, IPs, etc.)
-
-### 2. Configure the SDK
-
-```ruby
+# Load the gem
 require 'sendpost_ruby_sdk'
 
-# Create configuration
-config = Sendpost::Configuration.new
-config.host = 'https://api.sendpost.io/api/v1'
-
-# Set your Sub-Account API Key (for sending emails)
-config.api_key['X-SubAccount-ApiKey'] = 'your_sub_account_api_key_here'
-```
-
-### 3. Send Your First Email
-
-```ruby
-# Create API client
-api_client = Sendpost::ApiClient.new(config)
-email_api = Sendpost::EmailApi.new(api_client)
-
-# Create email message
-email_message = Sendpost::EmailMessageObject.new
-
-# Set sender
-from_addr = Sendpost::EmailMessageFrom.new
-from_addr.email = 'sender@yourdomain.com'
-from_addr.name = 'Your Name'
-email_message.from = from_addr
-
-# Set recipient
-recipient = Sendpost::EmailMessageToInner.new
-recipient.email = 'recipient@example.com'
-recipient.name = 'Recipient Name'
-email_message.to = [recipient]
-
-# Set email content
-email_message.subject = 'Hello from SendPost!'
-email_message.html_body = '<h1>Welcome!</h1><p>This is your first email sent with SendPost Ruby SDK.</p>'
-email_message.text_body = 'Welcome! This is your first email sent with SendPost Ruby SDK.'
-
-# Enable tracking
-email_message.track_opens = true
-email_message.track_clicks = true
-
-# Send the email
-begin
-  responses = email_api.send_email(email_message)
-  if responses && !responses.empty?
-    puts "Email sent successfully! Message ID: #{responses[0].message_id}"
-  end
-rescue Sendpost::ApiError => e
-  puts "Error sending email: #{e.code} - #{e.response_body}"
+# Setup authorization
+Sendpost.configure do |config|
+  # Configure API key authorization: subAccountAuth
+  config.api_key['X-SubAccount-ApiKey'] = 'YOUR API KEY'
+  # Uncomment the following line to set a prefix for the API key, e.g. 'Bearer' (defaults to nil)
+  # config.api_key_prefix['X-SubAccount-ApiKey'] = 'Bearer'
 end
-```
 
-## Detailed Usage Guide
-
-### Understanding API Keys
-
-SendPost uses two types of API keys:
-
-**Sub-Account API Key (`X-SubAccount-ApiKey`)**
-- Used for: Sending emails, managing domains, viewing sub-account statistics
-- Where to find: SendPost Dashboard → Sub-Accounts → API Keys
-
-**Account API Key (`X-Account-ApiKey`)**
-- Used for: Creating sub-accounts, managing IPs, creating webhooks, account-level statistics
-- Where to find: SendPost Dashboard → Account Settings → API Keys
-
-### Sending Emails
-
-#### Basic Email
-
-```ruby
-require 'sendpost_ruby_sdk'
-
-# Setup
-config = Sendpost::Configuration.new
-config.host = 'https://api.sendpost.io/api/v1'
-config.api_key['X-SubAccount-ApiKey'] = 'your_sub_account_api_key'
-
-api_client = Sendpost::ApiClient.new(config)
-email_api = Sendpost::EmailApi.new(api_client)
-
-# Create message
-email_message = Sendpost::EmailMessageObject.new
-
-# From address
-from = Sendpost::EmailMessageFrom.new
-from.email = 'noreply@yourdomain.com'
-from.name = 'Your Company'
-email_message.from = from
-
-# To address
-to = Sendpost::EmailMessageToInner.new
-to.email = 'customer@example.com'
-to.name = 'Customer Name'
-email_message.to = [to]
-
-# Email content
-email_message.subject = 'Order Confirmation'
-email_message.html_body = '<h1>Thank you for your order!</h1>'
-email_message.text_body = 'Thank you for your order!'
-
-# Send
-responses = email_api.send_email(email_message)
-puts "Sent! Message ID: #{responses[0].message_id}"
-```
-
-#### Email with Multiple Recipients
-
-```ruby
-# Create multiple recipients
-recipient1 = Sendpost::EmailMessageToInner.new
-recipient1.email = 'user1@example.com'
-recipient1.name = 'User One'
-
-recipient2 = Sendpost::EmailMessageToInner.new
-recipient2.email = 'user2@example.com'
-recipient2.name = 'User Two'
-
-# Add CC recipients
-cc_recipient = Sendpost::EmailMessageToInnerCcInner.new
-cc_recipient.email = 'cc@example.com'
-recipient1.cc = [cc_recipient]
-
-# Add BCC recipients
-bcc_recipient = Sendpost::EmailMessageToInnerBccInner.new
-bcc_recipient.email = 'bcc@example.com'
-recipient1.bcc = [bcc_recipient]
-
-# Set all recipients
-email_message.to = [recipient1, recipient2]
-```
-
-#### Email with Attachments
-
-```ruby
-# Create attachment
-attachment = Sendpost::Attachment.new
-attachment.name = 'invoice.pdf'
-attachment.content = Base64.encode64(File.read('path/to/invoice.pdf'))
-attachment.content_type = 'application/pdf'
-
-email_message.attachments = [attachment]
-```
-
-#### Email with Custom Fields and Headers
-
-```ruby
-# Add custom fields to recipient (for personalization)
-recipient = Sendpost::EmailMessageToInner.new
-recipient.email = 'customer@example.com'
-recipient.custom_fields = {
-  'customer_id' => '12345',
-  'order_number' => 'ORD-67890',
-  'total_amount' => '99.99'
-}
-
-# Add custom headers
-email_message.headers = {
-  'X-Order-ID' => '12345',
-  'X-Email-Type' => 'transactional'
-}
-
-# Add groups for analytics
-email_message.groups = ['transactional', 'order-confirmation']
-```
-
-#### Email with Reply-To
-
-```ruby
-reply_to = Sendpost::EmailMessageReplyTo.new
-reply_to.email = 'support@yourdomain.com'
-reply_to.name = 'Support Team'
-email_message.reply_to = reply_to
-```
-
-### Managing Domains
-
-Before sending emails, you need to add and verify your sending domain.
-
-#### Add a Domain
-
-```ruby
-# Use Sub-Account API Key
-config = Sendpost::Configuration.new
-config.host = 'https://api.sendpost.io/api/v1'
-config.api_key['X-SubAccount-ApiKey'] = 'your_sub_account_api_key'
-
-api_client = Sendpost::ApiClient.new(config)
-domain_api = Sendpost::DomainApi.new(api_client)
-
-# Create domain request
-domain_request = Sendpost::CreateDomainRequest.new
-domain_request.name = 'yourdomain.com'
-
-# Add domain
-domain = domain_api.subaccount_domain_post(domain_request)
-
-puts "Domain added! ID: #{domain.id}"
-puts "DKIM Record: #{domain.dkim.text_value}" if domain.dkim
-
-# IMPORTANT: Add the DNS records shown to your domain's DNS settings
-```
-
-#### List All Domains
-
-```ruby
-domains = domain_api.get_all_domains
-
-domains.each do |domain|
-  puts "Domain: #{domain.name}"
-  puts "Verified: #{domain.verified ? 'Yes' : 'No'}"
-  puts "---"
-end
-```
-
-#### Get Domain Details
-
-```ruby
-domain_id = 'your_domain_id'
-domain = domain_api.subaccount_domain_domain_id_get(domain_id)
-
-puts "Domain: #{domain.name}"
-puts "Verified: #{domain.verified}"
-puts "DKIM: #{domain.dkim.text_value}" if domain.dkim
-```
-
-### Viewing Statistics
-
-#### Get Sub-Account Statistics
-
-```ruby
-require 'date'
-
-# Use Account API Key for statistics
-config = Sendpost::Configuration.new
-config.host = 'https://api.sendpost.io/api/v1'
-config.api_key['X-Account-ApiKey'] = 'your_account_api_key'
-
-api_client = Sendpost::ApiClient.new(config)
-stats_api = Sendpost::StatsApi.new(api_client)
-
-# Get stats for last 7 days
-sub_account_id = 'your_sub_account_id'
-to_date = Date.today
-from_date = to_date - 7
-
-stats = stats_api.account_subaccount_stat_subaccount_id_get(
-  from_date, 
-  to_date, 
-  sub_account_id
-)
-
-stats.each do |stat|
-  puts "Date: #{stat.date}"
-  if stat.stats
-    puts "  Processed: #{stat.stats.processed || 0}"
-    puts "  Delivered: #{stat.stats.delivered || 0}"
-    puts "  Opened: #{stat.stats.opened || 0}"
-    puts "  Clicked: #{stat.stats.clicked || 0}"
-    puts "  Bounced: #{stat.stats.hard_bounced || 0}"
-    puts "  Spam: #{stat.stats.spam || 0}"
-  end
-  puts "---"
-end
-```
-
-#### Get Aggregate Statistics
-
-```ruby
-# Get overall stats for a sub-account
-aggregate_stat = stats_api.account_subaccount_stat_subaccount_id_aggregate_get(
-  from_date,
-  to_date,
-  sub_account_id
-)
-
-puts "Total Processed: #{aggregate_stat.processed || 0}"
-puts "Total Delivered: #{aggregate_stat.delivered || 0}"
-puts "Total Opened: #{aggregate_stat.opened || 0}"
-puts "Total Clicked: #{aggregate_stat.clicked || 0}"
-```
-
-#### Get Account-Level Statistics
-
-```ruby
-# Use StatsAApi for account-level stats
-stats_a_api = Sendpost::StatsAApi.new(api_client)
-
-account_stats = stats_a_api.get_all_account_stats(from_date, to_date)
-
-account_stats.each do |stat|
-  puts "Date: #{stat.date}"
-  if stat.stat
-    puts "  Processed: #{stat.stat.processed || 0}"
-    puts "  Delivered: #{stat.stat.delivered || 0}"
-  end
-end
-```
-
-### Managing Sub-Accounts
-
-#### List All Sub-Accounts
-
-```ruby
-# Use Account API Key
-config = Sendpost::Configuration.new
-config.host = 'https://api.sendpost.io/api/v1'
-config.api_key['X-Account-ApiKey'] = 'your_account_api_key'
-
-api_client = Sendpost::ApiClient.new(config)
-sub_account_api = Sendpost::SubAccountApi.new(api_client)
-
-sub_accounts = sub_account_api.get_all_sub_accounts
-
-sub_accounts.each do |sub_account|
-  puts "ID: #{sub_account.id}"
-  puts "Name: #{sub_account.name}"
-  puts "API Key: #{sub_account.api_key}"
-  puts "---"
-end
-```
-
-#### Create a Sub-Account
-
-```ruby
-new_sub_account = Sendpost::CreateSubAccountRequest.new
-new_sub_account.name = "Client Account - #{Time.now.to_i}"
-
-sub_account = sub_account_api.create_sub_account(new_sub_account)
-
-puts "Created! ID: #{sub_account.id}"
-puts "API Key: #{sub_account.api_key}"
-```
-
-#### Get Sub-Account Details
-
-```ruby
-sub_account_id = 'your_sub_account_id'
-sub_account = sub_account_api.get_sub_account(sub_account_id)
-
-puts "Name: #{sub_account.name}"
-puts "Type: #{sub_account.type}"
-puts "Blocked: #{sub_account.blocked}"
-```
-
-### Managing Webhooks
-
-Webhooks allow you to receive real-time notifications when email events occur.
-
-#### Create a Webhook
-
-```ruby
-# Use Account API Key
-config = Sendpost::Configuration.new
-config.host = 'https://api.sendpost.io/api/v1'
-config.api_key['X-Account-ApiKey'] = 'your_account_api_key'
-
-api_client = Sendpost::ApiClient.new(config)
-webhook_api = Sendpost::WebhookApi.new(api_client)
-
-# Create webhook request
-webhook_request = Sendpost::CreateWebhookRequest.new
-webhook_request.url = 'https://your-app.com/webhooks/sendpost'
-webhook_request.enabled = true
-
-# Configure which events to receive
-webhook_request.processed = true      # Email processed
-webhook_request.delivered = true      # Email delivered
-webhook_request.dropped = true       # Email dropped
-webhook_request.soft_bounced = true  # Soft bounce
-webhook_request.hard_bounced = true  # Hard bounce
-webhook_request.opened = true        # Email opened
-webhook_request.clicked = true       # Link clicked
-webhook_request.unsubscribed = true  # Unsubscribed
-webhook_request.spam = true          # Marked as spam
-
-webhook = webhook_api.create_webhook(webhook_request)
-
-puts "Webhook created! ID: #{webhook.id}"
-```
-
-#### List All Webhooks
-
-```ruby
-webhooks = webhook_api.get_all_webhooks
-
-webhooks.each do |webhook|
-  puts "ID: #{webhook.id}"
-  puts "URL: #{webhook.url}"
-  puts "Enabled: #{webhook.enabled}"
-  puts "---"
-end
-```
-
-### Retrieving Message Details
-
-```ruby
-# Use Account API Key
-config = Sendpost::Configuration.new
-config.host = 'https://api.sendpost.io/api/v1'
-config.api_key['X-Account-ApiKey'] = 'your_account_api_key'
-
-api_client = Sendpost::ApiClient.new(config)
-message_api = Sendpost::MessageApi.new(api_client)
-
-# Get message by ID (from email send response)
-message_id = 'your_message_id'
-message = message_api.get_message_by_id(message_id)
-
-puts "Message ID: #{message.message_id}"
-puts "From: #{message.from.email}" if message.from
-puts "To: #{message.to.email}" if message.to
-puts "Subject: #{message.subject}"
-puts "Submitted At: #{message.submitted_at}"
-puts "IP Used: #{message.public_ip}"
-```
-
-### Managing Suppressions
-
-Suppressions are email addresses that should not receive emails (unsubscribed, bounced, etc.).
-
-#### Add Suppressions
-
-```ruby
-# Use Sub-Account API Key
-config = Sendpost::Configuration.new
-config.host = 'https://api.sendpost.io/api/v1'
-config.api_key['X-SubAccount-ApiKey'] = 'your_sub_account_api_key'
-
-api_client = Sendpost::ApiClient.new(config)
-suppression_api = Sendpost::SuppressionApi.new(api_client)
-
-# Create suppression request
-suppression_request = Sendpost::CreateSuppressionRequest.new
-
-# Add hard bounces
-hard_bounce = Sendpost::CreateSuppressionRequestHardBounceInner.new
-hard_bounce.email = 'bounced@example.com'
-suppression_request.hard_bounce = [hard_bounce]
-
-# Add unsubscribes
-unsubscribe = Sendpost::CreateSuppressionRequestUnsubscribeInner.new
-unsubscribe.email = 'unsubscribed@example.com'
-suppression_request.unsubscribe = [unsubscribe]
-
-# Add spam complaints
-spam = Sendpost::CreateSuppressionRequestSpamComplaintInner.new
-spam.email = 'spam@example.com'
-suppression_request.spam_complaint = [spam]
-
-# Add manual suppressions
-manual = Sendpost::CreateSuppressionRequestManualInner.new
-manual.email = 'manual@example.com'
-suppression_request.manual = [manual]
-
-suppression_api.create_suppression(suppression_request)
-puts "Suppressions added successfully"
-```
-
-#### List Suppressions
-
-```ruby
-to_date = Date.today
-from_date = to_date - 7
-
-suppressions = suppression_api.get_suppression_list(from_date, to_date)
-
-suppressions.each do |suppression|
-  puts "Email: #{suppression.email}"
-  puts "Type: #{suppression.type}"
-  puts "---"
-end
-```
-
-## Error Handling
-
-The SDK raises `Sendpost::ApiError` when API calls fail. Always wrap API calls in begin/rescue blocks:
-
-```ruby
-begin
-  responses = email_api.send_email(email_message)
-  puts "Success!"
-rescue Sendpost::ApiError => e
-  puts "API Error:"
-  puts "  Status Code: #{e.code}"
-  puts "  Response: #{e.response_body}"
-  
-  case e.code
-  when 401
-    puts "  Issue: Invalid or missing API key"
-  when 403
-    puts "  Issue: Resource already exists or insufficient permissions"
-  when 404
-    puts "  Issue: Resource not found"
-  when 422
-    puts "  Issue: Invalid request data"
-  when 500
-    puts "  Issue: SendPost server error"
-  end
-rescue StandardError => e
-  puts "Unexpected error: #{e.message}"
-end
-```
-
-### Common HTTP Status Codes
-
-| Code | Meaning | What to Do |
-|------|---------|------------|
-| 200 | Success | Everything worked |
-| 401 | Unauthorized | Check your API key |
-| 403 | Forbidden | Resource exists or no permission |
-| 404 | Not Found | Resource ID doesn't exist |
-| 422 | Invalid Data | Check your request body |
-| 500 | Server Error | Try again later |
-| 503 | Service Unavailable | SendPost is down for maintenance |
-
-## Complete Example
-
-Here's a complete example that demonstrates common operations:
-
-```ruby
-#!/usr/bin/env ruby
-require 'sendpost_ruby_sdk'
-require 'date'
-
-# Configuration
-SUB_ACCOUNT_API_KEY = ENV['SENDPOST_SUB_ACCOUNT_API_KEY'] || 'your_key_here'
-ACCOUNT_API_KEY = ENV['SENDPOST_ACCOUNT_API_KEY'] || 'your_key_here'
-
-# Setup Sub-Account API (for sending emails)
-sub_config = Sendpost::Configuration.new
-sub_config.host = 'https://api.sendpost.io/api/v1'
-sub_config.api_key['X-SubAccount-ApiKey'] = SUB_ACCOUNT_API_KEY
-
-sub_api_client = Sendpost::ApiClient.new(sub_config)
-email_api = Sendpost::EmailApi.new(sub_api_client)
-
-# Setup Account API (for managing resources)
-account_config = Sendpost::Configuration.new
-account_config.host = 'https://api.sendpost.io/api/v1'
-account_config.api_key['X-Account-ApiKey'] = ACCOUNT_API_KEY
-
-account_api_client = Sendpost::ApiClient.new(account_config)
-
-# Send an email
-email_message = Sendpost::EmailMessageObject.new
-
-from = Sendpost::EmailMessageFrom.new
-from.email = 'sender@yourdomain.com'
-from.name = 'Your Company'
-email_message.from = from
-
-to = Sendpost::EmailMessageToInner.new
-to.email = 'recipient@example.com'
-to.name = 'Recipient'
-email_message.to = [to]
-
-email_message.subject = 'Test Email'
-email_message.html_body = '<h1>Hello!</h1><p>This is a test email.</p>'
-email_message.text_body = 'Hello! This is a test email.'
-email_message.track_opens = true
-email_message.track_clicks = true
+api_instance = Sendpost::DomainApi.new
+create_domain_request = Sendpost::CreateDomainRequest.new({name: 'piedpiper.com'}) # CreateDomainRequest | 
 
 begin
-  responses = email_api.send_email(email_message)
-  message_id = responses[0].message_id
-  puts "Email sent! Message ID: #{message_id}"
-  
-  # Get message details
-  message_api = Sendpost::MessageApi.new(account_api_client)
-  message = message_api.get_message_by_id(message_id)
-  puts "Message details retrieved successfully"
-  
+  #Create Domain
+  result = api_instance.create_sub_account_domain(create_domain_request)
+  p result
 rescue Sendpost::ApiError => e
-  puts "Error: #{e.code} - #{e.response_body}"
+  puts "Exception when calling DomainApi->create_sub_account_domain: #{e}"
 end
+
 ```
 
-## API Reference
+## Documentation for API Endpoints
 
-For complete API documentation, see the [API Reference](docs/) directory. Key API classes:
+All URIs are relative to *https://api.sendpost.io/api/v1*
 
-- `Sendpost::EmailApi` - Send emails
-- `Sendpost::DomainApi` - Manage domains
-- `Sendpost::SubAccountApi` - Manage sub-accounts
-- `Sendpost::StatsApi` - View statistics
-- `Sendpost::WebhookApi` - Manage webhooks
-- `Sendpost::SuppressionApi` - Manage suppressions
-- `Sendpost::MessageApi` - Retrieve message details
+Class | Method | HTTP request | Description
+------------ | ------------- | ------------- | -------------
+*Sendpost::DomainApi* | [**create_sub_account_domain**](docs/DomainApi.md#create_sub_account_domain) | **POST** /subaccount/domain | Create Domain
+*Sendpost::DomainApi* | [**delete_sub_account_domain**](docs/DomainApi.md#delete_sub_account_domain) | **DELETE** /subaccount/domain/{domain_id} | Delete Domain
+*Sendpost::DomainApi* | [**get_all_domains**](docs/DomainApi.md#get_all_domains) | **GET** /subaccount/domain | List Domains
+*Sendpost::DomainApi* | [**get_sub_account_domain**](docs/DomainApi.md#get_sub_account_domain) | **GET** /subaccount/domain/{domain_id} | Get Domain
+*Sendpost::EmailApi* | [**send_email**](docs/EmailApi.md#send_email) | **POST** /subaccount/email/ | Send Email
+*Sendpost::EmailApi* | [**send_email_with_template**](docs/EmailApi.md#send_email_with_template) | **POST** /subaccount/email/template | Send Email With Template
+*Sendpost::IPApi* | [**allocate_new_ip**](docs/IPApi.md#allocate_new_ip) | **PUT** /account/ip/allocate | Allocate IP
+*Sendpost::IPApi* | [**delete_ip**](docs/IPApi.md#delete_ip) | **DELETE** /account/ip/{ip_id} | Delete IP
+*Sendpost::IPApi* | [**get_all_ips**](docs/IPApi.md#get_all_ips) | **GET** /account/ip/ | List IPs
+*Sendpost::IPApi* | [**get_specific_ip**](docs/IPApi.md#get_specific_ip) | **GET** /account/ip/{ip_id} | Get IP
+*Sendpost::IPApi* | [**update_ip**](docs/IPApi.md#update_ip) | **PUT** /account/ip/{ip_id} | Update IP
+*Sendpost::IPPoolsApi* | [**create_ip_pool**](docs/IPPoolsApi.md#create_ip_pool) | **POST** /account/ippool | Create IPPool
+*Sendpost::IPPoolsApi* | [**delete_ip_pool**](docs/IPPoolsApi.md#delete_ip_pool) | **DELETE** /account/ippool/{ippool_id} | Delete IPPool
+*Sendpost::IPPoolsApi* | [**get_all_ip_pools**](docs/IPPoolsApi.md#get_all_ip_pools) | **GET** /account/ippool | List IPPools
+*Sendpost::IPPoolsApi* | [**get_ip_pool_by_id**](docs/IPPoolsApi.md#get_ip_pool_by_id) | **GET** /account/ippool/{ippool_id} | Get IPPool
+*Sendpost::IPPoolsApi* | [**update_ip_pool**](docs/IPPoolsApi.md#update_ip_pool) | **PUT** /account/ippool/{ippool_id} | Update IPPool
+*Sendpost::MessageApi* | [**get_all_messages**](docs/MessageApi.md#get_all_messages) | **GET** /account/message | List Messages
+*Sendpost::MessageApi* | [**get_message_by_id**](docs/MessageApi.md#get_message_by_id) | **GET** /account/message/{message_id} | Get Message
+*Sendpost::StatsApi* | [**account_subaccount_stat_subaccount_id_aggregate_get**](docs/StatsApi.md#account_subaccount_stat_subaccount_id_aggregate_get) | **GET** /account/subaccount/stat/{subaccount_id}/aggregate | Get Aggregate Stats
+*Sendpost::StatsApi* | [**account_subaccount_stat_subaccount_id_get**](docs/StatsApi.md#account_subaccount_stat_subaccount_id_get) | **GET** /account/subaccount/stat/{subaccount_id} | List Stats
+*Sendpost::StatsApi* | [**get_aggregate_stats_by_group**](docs/StatsApi.md#get_aggregate_stats_by_group) | **GET** /account/subaccount/stat/{subaccount_id}/group | Get Group Aggregate Stats
+*Sendpost::StatsAApi* | [**get_account_aggregate_stats**](docs/StatsAApi.md#get_account_aggregate_stats) | **GET** /account/stat/aggregate | Get Account Aggregate Stats
+*Sendpost::StatsAApi* | [**get_account_aggregate_stats_by_group**](docs/StatsAApi.md#get_account_aggregate_stats_by_group) | **GET** /account/stat/aggregate/group | Get Account Group Aggregate Stats
+*Sendpost::StatsAApi* | [**get_account_stats_by_group**](docs/StatsAApi.md#get_account_stats_by_group) | **GET** /account/stat/group | List Account Group Stats
+*Sendpost::StatsAApi* | [**get_all_account_stats**](docs/StatsAApi.md#get_all_account_stats) | **GET** /account/stat | List Account Stats
+*Sendpost::SubAccountApi* | [**create_sub_account**](docs/SubAccountApi.md#create_sub_account) | **POST** /account/subaccount/ | Create Sub-Account
+*Sendpost::SubAccountApi* | [**delete_sub_account**](docs/SubAccountApi.md#delete_sub_account) | **DELETE** /account/subaccount/{subaccount_id} | Delete Sub-Account
+*Sendpost::SubAccountApi* | [**get_all_sub_accounts**](docs/SubAccountApi.md#get_all_sub_accounts) | **GET** /account/subaccount/ | List Sub-Accounts
+*Sendpost::SubAccountApi* | [**get_sub_account**](docs/SubAccountApi.md#get_sub_account) | **GET** /account/subaccount/{subaccount_id} | Get Sub-Account
+*Sendpost::SubAccountApi* | [**update_sub_account**](docs/SubAccountApi.md#update_sub_account) | **PUT** /account/subaccount/{subaccount_id} | Update Sub-Account
+*Sendpost::SuppressionApi* | [**create_suppression**](docs/SuppressionApi.md#create_suppression) | **POST** /subaccount/suppression | Create Suppressions
+*Sendpost::SuppressionApi* | [**delete_suppression**](docs/SuppressionApi.md#delete_suppression) | **DELETE** /subaccount/suppression | Delete Suppressions
+*Sendpost::SuppressionApi* | [**get_suppression_list**](docs/SuppressionApi.md#get_suppression_list) | **GET** /subaccount/suppression | List Suppressions
+*Sendpost::WebhookApi* | [**create_webhook**](docs/WebhookApi.md#create_webhook) | **POST** /account/webhook | Create Webhook
+*Sendpost::WebhookApi* | [**delete_webhook**](docs/WebhookApi.md#delete_webhook) | **DELETE** /account/webhook/{webhook_id} | Delete Webhook
+*Sendpost::WebhookApi* | [**get_all_webhooks**](docs/WebhookApi.md#get_all_webhooks) | **GET** /account/webhook | List Webhooks
+*Sendpost::WebhookApi* | [**get_webhook**](docs/WebhookApi.md#get_webhook) | **GET** /account/webhook/{webhook_id} | Get Webhook
+*Sendpost::WebhookApi* | [**update_webhook**](docs/WebhookApi.md#update_webhook) | **PUT** /account/webhook/{webhook_id} | Update Webhook
 
-## Requirements
 
-- Ruby 2.7 or higher
-- Internet connection
+## Documentation for Models
 
-## Getting Help
+ - [Sendpost::AccountCycleUsage](docs/AccountCycleUsage.md)
+ - [Sendpost::AccountStats](docs/AccountStats.md)
+ - [Sendpost::AccountWebhookWithStats](docs/AccountWebhookWithStats.md)
+ - [Sendpost::AggregateStat](docs/AggregateStat.md)
+ - [Sendpost::AggregateStats](docs/AggregateStats.md)
+ - [Sendpost::Attachment](docs/Attachment.md)
+ - [Sendpost::BlacklistLinks](docs/BlacklistLinks.md)
+ - [Sendpost::BlacklistResource](docs/BlacklistResource.md)
+ - [Sendpost::BlacklistedOn](docs/BlacklistedOn.md)
+ - [Sendpost::CopyTo](docs/CopyTo.md)
+ - [Sendpost::CreateDomainRequest](docs/CreateDomainRequest.md)
+ - [Sendpost::CreateSuppressionRequest](docs/CreateSuppressionRequest.md)
+ - [Sendpost::CreateSuppressionRequestHardBounceInner](docs/CreateSuppressionRequestHardBounceInner.md)
+ - [Sendpost::CreateSuppressionRequestManualInner](docs/CreateSuppressionRequestManualInner.md)
+ - [Sendpost::CreateSuppressionRequestSpamComplaintInner](docs/CreateSuppressionRequestSpamComplaintInner.md)
+ - [Sendpost::CreateSuppressionRequestUnsubscribeInner](docs/CreateSuppressionRequestUnsubscribeInner.md)
+ - [Sendpost::DailyStatistics](docs/DailyStatistics.md)
+ - [Sendpost::DateStat](docs/DateStat.md)
+ - [Sendpost::DeleteResponse](docs/DeleteResponse.md)
+ - [Sendpost::DeleteSubAccountResponse](docs/DeleteSubAccountResponse.md)
+ - [Sendpost::DeleteSuppression200Response](docs/DeleteSuppression200Response.md)
+ - [Sendpost::DeleteSuppressionRequest](docs/DeleteSuppressionRequest.md)
+ - [Sendpost::DeleteSuppressionRequestSuppressionsInner](docs/DeleteSuppressionRequestSuppressionsInner.md)
+ - [Sendpost::DeleteWebhookResponse](docs/DeleteWebhookResponse.md)
+ - [Sendpost::Device](docs/Device.md)
+ - [Sendpost::DnsRecord](docs/DnsRecord.md)
+ - [Sendpost::Domain](docs/Domain.md)
+ - [Sendpost::DomainStat](docs/DomainStat.md)
+ - [Sendpost::EIP](docs/EIP.md)
+ - [Sendpost::EmailAddress](docs/EmailAddress.md)
+ - [Sendpost::EmailMessage](docs/EmailMessage.md)
+ - [Sendpost::EmailMessageObject](docs/EmailMessageObject.md)
+ - [Sendpost::EmailMessageWithTemplate](docs/EmailMessageWithTemplate.md)
+ - [Sendpost::EmailResponse](docs/EmailResponse.md)
+ - [Sendpost::EmailTypeStat](docs/EmailTypeStat.md)
+ - [Sendpost::ErrorResponse](docs/ErrorResponse.md)
+ - [Sendpost::ErrorResponseError](docs/ErrorResponseError.md)
+ - [Sendpost::ErrorResponseErrorDetailsInner](docs/ErrorResponseErrorDetailsInner.md)
+ - [Sendpost::Event](docs/Event.md)
+ - [Sendpost::EventMetadata](docs/EventMetadata.md)
+ - [Sendpost::GeoLocation](docs/GeoLocation.md)
+ - [Sendpost::GroupStat](docs/GroupStat.md)
+ - [Sendpost::IP](docs/IP.md)
+ - [Sendpost::IPAllocationRequest](docs/IPAllocationRequest.md)
+ - [Sendpost::IPDeletionResponse](docs/IPDeletionResponse.md)
+ - [Sendpost::IPPool](docs/IPPool.md)
+ - [Sendpost::IPPoolCreateRequest](docs/IPPoolCreateRequest.md)
+ - [Sendpost::IPPoolDeleteResponse](docs/IPPoolDeleteResponse.md)
+ - [Sendpost::IPPoolStat](docs/IPPoolStat.md)
+ - [Sendpost::IPPoolUpdateRequest](docs/IPPoolUpdateRequest.md)
+ - [Sendpost::IPStat](docs/IPStat.md)
+ - [Sendpost::IPUpdateRequest](docs/IPUpdateRequest.md)
+ - [Sendpost::Label](docs/Label.md)
+ - [Sendpost::Member](docs/Member.md)
+ - [Sendpost::Message](docs/Message.md)
+ - [Sendpost::NewSubAccount](docs/NewSubAccount.md)
+ - [Sendpost::NewWebhook](docs/NewWebhook.md)
+ - [Sendpost::Os](docs/Os.md)
+ - [Sendpost::PostmasterDomainStat](docs/PostmasterDomainStat.md)
+ - [Sendpost::ProviderStat](docs/ProviderStat.md)
+ - [Sendpost::RAIPPoolStat](docs/RAIPPoolStat.md)
+ - [Sendpost::RDStat](docs/RDStat.md)
+ - [Sendpost::RIPStat](docs/RIPStat.md)
+ - [Sendpost::RStat](docs/RStat.md)
+ - [Sendpost::Recipient](docs/Recipient.md)
+ - [Sendpost::SDStat](docs/SDStat.md)
+ - [Sendpost::SMTPAuth](docs/SMTPAuth.md)
+ - [Sendpost::SeedContactStats](docs/SeedContactStats.md)
+ - [Sendpost::Stat](docs/Stat.md)
+ - [Sendpost::SubAccount](docs/SubAccount.md)
+ - [Sendpost::SubAccountStat](docs/SubAccountStat.md)
+ - [Sendpost::SubAccountStatForPool](docs/SubAccountStatForPool.md)
+ - [Sendpost::Suppression](docs/Suppression.md)
+ - [Sendpost::TPSPStat](docs/TPSPStat.md)
+ - [Sendpost::UpdateSubAccount](docs/UpdateSubAccount.md)
+ - [Sendpost::UpdateWebhook](docs/UpdateWebhook.md)
+ - [Sendpost::UserAgent](docs/UserAgent.md)
+ - [Sendpost::ValidationStat](docs/ValidationStat.md)
+ - [Sendpost::Webhook](docs/Webhook.md)
+ - [Sendpost::WebhookObject](docs/WebhookObject.md)
 
-- **Documentation**: [https://docs.sendpost.io](https://docs.sendpost.io)
-- **Email Support**: hello@sendpost.io
-- **Website**: [https://sendpost.io](https://sendpost.io)
-- **Developer Portal**: [https://app.sendpost.io](https://app.sendpost.io)
 
-## License
+## Documentation for Authorization
 
-This SDK is provided under the Unlicense. See LICENSE file for details.
 
-## Version
+Authentication schemes defined for the API:
+### accountAuth
 
-Current version: 2.0.0
 
-Generated by [OpenAPI Generator](https://openapi-generator.tech)
+- **Type**: API key
+- **API key parameter name**: X-Account-ApiKey
+- **Location**: HTTP header
+
+### subAccountAuth
+
+
+- **Type**: API key
+- **API key parameter name**: X-SubAccount-ApiKey
+- **Location**: HTTP header
+

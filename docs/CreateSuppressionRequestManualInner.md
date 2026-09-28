@@ -12,7 +12,7 @@
 require 'sendpost_ruby_sdk'
 
 instance = Sendpost::CreateSuppressionRequestManualInner.new(
-  email: russhannelman@gmail.com
+  email: contact-support@company.com
 )
 ```
 

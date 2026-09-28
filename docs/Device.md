@@ -4,7 +4,7 @@
 
 | Name | Type | Description | Notes |
 | ---- | ---- | ----------- | ----- |
-| **family** | **String** |  | [optional] |
+| **family** | **String** | Device type or model family. Common values: Mac, iPhone, iPad, Windows Desktop, Android, Other  | [optional] |
 
 ## Example
 
@@ -12,7 +12,7 @@
 require 'sendpost_ruby_sdk'
 
 instance = Sendpost::Device.new(
-  family: 
+  family: Mac
 )
 ```
 

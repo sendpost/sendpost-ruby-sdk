@@ -16,7 +16,7 @@ All URIs are relative to *https://api.sendpost.io/api/v1*
 
 Get Account Aggregate Stats
 
-Retrieve aggregated email statistics for all sub-accounts of a specific account for a given date range.
+Retrieve summarized email statistics across all sub-accounts for a date range. Returns a single aggregated record—perfect for high-level reporting and dashboards.  **Use Cases:** - Annual email program review - Quarterly business reports - Month-over-month comparison - Board-level metrics - ROI calculations for email program  **Example:** Get full year stats for 2024: ``` GET /account/stat/aggregate?from=2024-01-01&to=2024-12-31 ```  **Note:** Maximum date range is 366 days (1 year). 
 
 ### Examples
 
@@ -32,8 +32,8 @@ Sendpost.configure do |config|
 end
 
 api_instance = Sendpost::StatsAApi.new
-from = Date.parse('2019-01-01') # Date | The start date for retrieving aggregated stats (inclusive)
-to = Date.parse('2019-12-31') # Date | The end date for retrieving aggregated stats (inclusive). The difference between `from` and `to` should not exceed 366 days.
+from = Date.parse('2024-01-01') # Date | Start date for aggregation (inclusive). Format YYYY-MM-DD.
+to = Date.parse('2024-12-31') # Date | End date for aggregation (inclusive). Max 366 days from `from` date.
 
 begin
   # Get Account Aggregate Stats
@@ -66,8 +66,8 @@ end
 
 | Name | Type | Description | Notes |
 | ---- | ---- | ----------- | ----- |
-| **from** | **Date** | The start date for retrieving aggregated stats (inclusive) |  |
-| **to** | **Date** | The end date for retrieving aggregated stats (inclusive). The difference between &#x60;from&#x60; and &#x60;to&#x60; should not exceed 366 days. |  |
+| **from** | **Date** | Start date for aggregation (inclusive). Format YYYY-MM-DD. |  |
+| **to** | **Date** | End date for aggregation (inclusive). Max 366 days from &#x60;from&#x60; date. |  |
 
 ### Return type
 
@@ -89,7 +89,7 @@ end
 
 Get Account Group Aggregate Stats
 
-Gets aggregated email stats for a specific group in all sub-accounts of a specific account for the given daterange. The maximum daterange for which these stats can be retrieved is 366 days.
+Retrieve summarized email statistics for a specific group across all sub-accounts. Returns a single aggregated record for the group—ideal for campaign reporting.  **Use Cases:** - Annual performance report for a specific product integration - Compare total metrics for different campaigns - Summarize email performance for a specific customer segment - Calculate ROI for a marketing campaign by group  **Example:** Get yearly stats for Shopify integration: ``` GET /account/stat/aggregate/group?group=shopify&from=2024-01-01&to=2024-12-31 ```  **Note:** Maximum date range is 366 days (1 year). 
 
 ### Examples
 
@@ -105,9 +105,9 @@ Sendpost.configure do |config|
 end
 
 api_instance = Sendpost::StatsAApi.new
-group = 'shopify' # String | Group whose aggregate stats need to be retrieved.
-from = Date.parse('2019-01-01') # Date | Date from which stats should be retrieved (should be in the format `YYYY-MM-DD`).
-to = Date.parse('2019-12-31') # Date | Date to which stats should be retrieved (should be in the format `YYYY-MM-DD`). Note that the difference between `from` and `to` should not be more than 366 days.
+group = 'shopify' # String | The group/tag name to filter and aggregate statistics by.
+from = Date.parse('2024-01-01') # Date | Start date for aggregation (inclusive). Format YYYY-MM-DD.
+to = Date.parse('2024-12-31') # Date | End date for aggregation (inclusive). Max 366 days from `from` date.
 
 begin
   # Get Account Group Aggregate Stats
@@ -140,9 +140,9 @@ end
 
 | Name | Type | Description | Notes |
 | ---- | ---- | ----------- | ----- |
-| **group** | **String** | Group whose aggregate stats need to be retrieved. |  |
-| **from** | **Date** | Date from which stats should be retrieved (should be in the format &#x60;YYYY-MM-DD&#x60;). |  |
-| **to** | **Date** | Date to which stats should be retrieved (should be in the format &#x60;YYYY-MM-DD&#x60;). Note that the difference between &#x60;from&#x60; and &#x60;to&#x60; should not be more than 366 days. |  |
+| **group** | **String** | The group/tag name to filter and aggregate statistics by. |  |
+| **from** | **Date** | Start date for aggregation (inclusive). Format YYYY-MM-DD. |  |
+| **to** | **Date** | End date for aggregation (inclusive). Max 366 days from &#x60;from&#x60; date. |  |
 
 ### Return type
 
@@ -164,7 +164,7 @@ end
 
 List Account Group Stats
 
-Gets a list of all email stats for all sub-accounts of a specific account by group for a given daterange. The maximum daterange for which these stats can be retrieved is 31 days.
+Retrieve daily email statistics for a specific group across all sub-accounts. Returns one record per day, filtered by the group/tag you specify.  **What are Groups?** Groups (tags) are labels attached to emails when sending. They enable segmented analytics across your entire account.  **Common Group Strategies:** | Strategy | Example Groups | |----------|----------------| | By Product | `shopify`, `wordpress`, `api-direct` | | By Type | `transactional`, `marketing`, `alerts` | | By Team | `sales-team`, `support`, `engineering` | | By Campaign | `black-friday-2024`, `summer-sale` |  **Use Cases:** - Compare performance across products/integrations - Track specific campaign performance account-wide - Analyze transactional vs marketing metrics - Benchmark different teams' email performance  **Note:** Maximum date range is 31 days. 
 
 ### Examples
 
@@ -180,9 +180,9 @@ Sendpost.configure do |config|
 end
 
 api_instance = Sendpost::StatsAApi.new
-group = 'shopify' # String | Group whose stats need to be retrieved
-from = Date.parse('2020-03-12') # Date | Date from which stats should be retrieved (should be in the format `YYYY-MM-DD`)
-to = Date.parse('2020-04-14') # Date | Date to which stats should be retrieved (should be in the format `YYYY-MM-DD`). Note that the difference between `from` and `to` should not be more than 31 days.
+group = 'shopify' # String | The group/tag name to filter statistics by.
+from = Date.parse('2024-01-01') # Date | Start date for stats retrieval (inclusive). Format YYYY-MM-DD.
+to = Date.parse('2024-01-31') # Date | End date for stats retrieval (inclusive). Max 31 days from `from` date.
 
 begin
   # List Account Group Stats
@@ -215,9 +215,9 @@ end
 
 | Name | Type | Description | Notes |
 | ---- | ---- | ----------- | ----- |
-| **group** | **String** | Group whose stats need to be retrieved |  |
-| **from** | **Date** | Date from which stats should be retrieved (should be in the format &#x60;YYYY-MM-DD&#x60;) |  |
-| **to** | **Date** | Date to which stats should be retrieved (should be in the format &#x60;YYYY-MM-DD&#x60;). Note that the difference between &#x60;from&#x60; and &#x60;to&#x60; should not be more than 31 days. |  |
+| **group** | **String** | The group/tag name to filter statistics by. |  |
+| **from** | **Date** | Start date for stats retrieval (inclusive). Format YYYY-MM-DD. |  |
+| **to** | **Date** | End date for stats retrieval (inclusive). Max 31 days from &#x60;from&#x60; date. |  |
 
 ### Return type
 
@@ -239,7 +239,7 @@ end
 
 List Account Stats
 
-Retrieve email statistics for all sub-accounts of a specific account for a given date range.
+Retrieve daily email statistics aggregated across all sub-accounts. Returns one record per day within the date range—ideal for organization-wide reporting.  **Metrics Per Day:** | Metric | Description | |--------|-------------| | `processed` | Total emails submitted across all sub-accounts | | `delivered` | Successfully delivered to recipients | | `dropped` | Blocked before sending | | `hardBounced` | Permanent delivery failures | | `softBounced` | Temporary delivery failures | | `opens` | Total email opens | | `clicks` | Total link clicks | | `unsubscribed` | Recipients who unsubscribed | | `spams` | Spam complaints received |  **Use Cases:** - Organization-wide email performance dashboard - Billing and usage tracking across all sub-accounts - Executive reporting for email program health - Trend analysis across your entire email operation  **Note:** Maximum date range is 31 days. 
 
 ### Examples
 
@@ -255,8 +255,8 @@ Sendpost.configure do |config|
 end
 
 api_instance = Sendpost::StatsAApi.new
-from = Date.parse('2020-03-12') # Date | The start date for retrieving stats (inclusive)
-to = Date.parse('2020-04-14') # Date | The end date for retrieving stats (inclusive). The difference between `from` and `to` should not exceed 31 days.
+from = Date.parse('2024-01-01') # Date | Start date for stats retrieval (inclusive). Format YYYY-MM-DD.
+to = Date.parse('2024-01-31') # Date | End date for stats retrieval (inclusive). Max 31 days from `from` date.
 
 begin
   # List Account Stats
@@ -289,8 +289,8 @@ end
 
 | Name | Type | Description | Notes |
 | ---- | ---- | ----------- | ----- |
-| **from** | **Date** | The start date for retrieving stats (inclusive) |  |
-| **to** | **Date** | The end date for retrieving stats (inclusive). The difference between &#x60;from&#x60; and &#x60;to&#x60; should not exceed 31 days. |  |
+| **from** | **Date** | Start date for stats retrieval (inclusive). Format YYYY-MM-DD. |  |
+| **to** | **Date** | End date for stats retrieval (inclusive). Max 31 days from &#x60;from&#x60; date. |  |
 
 ### Return type
 

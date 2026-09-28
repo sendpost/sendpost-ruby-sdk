@@ -4,19 +4,15 @@
 
 | Name | Type | Description | Notes |
 | ---- | ---- | ----------- | ----- |
-| **id** | **Integer** |  | [optional] |
-| **name** | **String** |  | [optional] |
-| **created** | **Integer** |  | [optional] |
-| **ips** | [**Array&lt;IP&gt;**](IP.md) |  | [optional] |
-| **third_party_sending_providers** | [**Array&lt;ThirdPartySendingProvider&gt;**](ThirdPartySendingProvider.md) |  | [optional] |
-| **routing_strategy** | **Integer** |  | [optional] |
-| **routing_meta_data** | **String** |  | [optional] |
-| **auto_warmup_enabled** | **Boolean** |  | [optional] |
-| **infra_monitor** | **Boolean** |  | [optional] |
-| **ip_domain_warmup_status** | **String** |  | [optional] |
-| **should_overflow** | **Boolean** | Indicates whether the IP should overflow, once email capacity of the IP Pool has been reached, should we send remaining emails over shared IP or not | [optional] |
-| **overflow_pool_name** | **String** | The name of the overflow pool | [optional] |
-| **warmup_interval** | **Integer** | The interval for the warmup | [optional] |
+| **id** | **Integer** | Unique identifier for the IP pool | [optional] |
+| **name** | **String** | Display name for the IP pool. Must be unique within your account. Use descriptive names like \&quot;transactional\&quot;, \&quot;marketing\&quot;, \&quot;high-priority\&quot;.  | [optional] |
+| **type** | **Integer** | Type of IP pool: - &#x60;0&#x60; &#x3D; Shared (uses shared IPs with pooled reputation) - &#x60;1&#x60; &#x3D; Dedicated (uses dedicated IPs exclusive to your account)  | [optional] |
+| **routing_strategy** | **Integer** | How emails are distributed across IPs/providers in this pool: - &#x60;0&#x60; &#x3D; Round Robin (equal distribution) - &#x60;1&#x60; &#x3D; Email Provider Strategy (route by recipient domain like Gmail, Yahoo) - &#x60;2&#x60; &#x3D; Volume Percentage Strategy (weighted distribution) - &#x60;3&#x60; &#x3D; Sending Domain Strategy (route by sender domain)  See the IPPools tag description for detailed routing configuration examples.  | [optional] |
+| **routing_meta_data** | **String** | JSON-encoded configuration for the selected routing strategy. Format depends on routingStrategy value. See IPPools documentation for examples.  For Round Robin (strategy 0): Use empty object &#x60;{}&#x60;  | [optional] |
+| **should_overflow** | **Boolean** | Whether to automatically overflow to a backup pool when this pool is unavailable (all IPs down) or at capacity (warmup limits reached).  | [optional] |
+| **overflow_pool_name** | **String** | Name of the IP pool to overflow to when shouldOverflow is enabled. The overflow pool must exist. Common pattern: overflow to shared IP pool.  | [optional] |
+| **ips** | [**Array&lt;IP&gt;**](IP.md) | List of dedicated IPs assigned to this pool | [optional] |
+| **created** | **Integer** | UNIX epoch timestamp in nanoseconds when the IP pool was created | [optional] |
 
 ## Example
 
@@ -26,17 +22,13 @@ require 'sendpost_ruby_sdk'
 instance = Sendpost::IPPool.new(
   id: 746,
   name: Transactional,
-  created: 1597511124804000,
-  ips: null,
-  third_party_sending_providers: null,
+  type: 1,
   routing_strategy: 0,
   routing_meta_data: {},
-  auto_warmup_enabled: false,
-  infra_monitor: true,
-  ip_domain_warmup_status: null,
   should_overflow: true,
-  overflow_pool_name: Transactional,
-  warmup_interval: 60
+  overflow_pool_name: shared-backup,
+  ips: null,
+  created: 1704067200000000000
 )
 ```
 

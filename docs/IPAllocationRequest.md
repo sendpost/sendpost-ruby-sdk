@@ -4,8 +4,8 @@
 
 | Name | Type | Description | Notes |
 | ---- | ---- | ----------- | ----- |
-| **overflow_pool** | **Boolean** | Determines whether emails should be sent over shared IP when the IP pool is full |  |
-| **ips** | **Array&lt;String&gt;** |  |  |
+| **ips** | **Array&lt;String&gt;** | List of IP addresses to allocate. These must be available IPs from SendPost&#39;s IP pool. Contact support to request IP allocation.  |  |
+| **auto_warmup_enabled** | **Boolean** | Enable automatic IP warmup for newly allocated IPs. Recommended: true for new IPs to gradually build sender reputation.  | [optional][default to true] |
 
 ## Example
 
@@ -13,8 +13,8 @@
 require 'sendpost_ruby_sdk'
 
 instance = Sendpost::IPAllocationRequest.new(
-  overflow_pool: true,
-  ips: null
+  ips: [34.21.14.11, 34.21.14.12],
+  auto_warmup_enabled: true
 )
 ```
 

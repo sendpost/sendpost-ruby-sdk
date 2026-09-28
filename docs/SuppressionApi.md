@@ -15,7 +15,7 @@ All URIs are relative to *https://api.sendpost.io/api/v1*
 
 Create Suppressions
 
-Creates new suppressions by posting to the suppression resource. You can specify different types of suppressions including `hardBounce`, `manual`, `unsubscribe`, and `spamComplaint`. 
+Add email addresses to your suppression list to prevent future emails from being sent. This is essential for maintaining sender reputation and compliance.  **When to Use Each Type:** | Type | Use When | |------|----------| | `hardBounce` | You know an address is permanently invalid | | `manual` | Processing do-not-contact requests from support | | `unsubscribe` | Syncing unsubscribes from external systems | | `spamComplaint` | Importing complaints from other providers |  **Common Use Cases:** - **Migration:** Import suppression list from previous email provider - **CRM Sync:** Add unsubscribes from your marketing platform - **Bulk Cleanup:** Add known invalid addresses from data cleaning - **Support Tickets:** Honor do-not-contact requests  **Best Practices:** - Import historical bounce data when migrating providers - Sync unsubscribes immediately when received from external sources - Process support-requested suppressions within 24 hours - Use `manual` for addresses you want to suppress without categorization 
 
 ### Examples
 
@@ -82,11 +82,11 @@ end
 
 ## delete_suppression
 
-> <Array<DeleteSuppression200ResponseInner>> delete_suppression(delete_suppression_request)
+> <DeleteSuppression200Response> delete_suppression(delete_suppression_request)
 
 Delete Suppressions
 
-Deletes one or more suppressions for a given sub-account. The request can contain a list of emails to delete specific suppressions or delete a single suppression. 
+Remove email addresses from your suppression list, allowing them to receive emails again.  **⚠️ Important: Use with caution!** Re-enabling sending to previously suppressed addresses can harm your sender reputation if used incorrectly.  **Valid Use Cases:** - User confirms their valid email was incorrectly bounced - Manual suppression was added by mistake - User explicitly requests re-subscription after unsubscribing - Testing/development addresses that were suppressed  **Not Recommended:** - Bulk removing hard bounces without individual verification - Removing spam complaints (users rarely want to receive emails again) - Attempting to re-engage addresses that bounced  **Best Practice:** Before removing a suppression, verify with the recipient that they want to receive emails and that their address is valid. 
 
 ### Examples
 
@@ -117,7 +117,7 @@ end
 
 This returns an Array which contains the response data, status code and headers.
 
-> <Array(<Array<DeleteSuppression200ResponseInner>>, Integer, Hash)> delete_suppression_with_http_info(delete_suppression_request)
+> <Array(<DeleteSuppression200Response>, Integer, Hash)> delete_suppression_with_http_info(delete_suppression_request)
 
 ```ruby
 begin
@@ -125,7 +125,7 @@ begin
   data, status_code, headers = api_instance.delete_suppression_with_http_info(delete_suppression_request)
   p status_code # => 2xx
   p headers # => { ... }
-  p data # => <Array<DeleteSuppression200ResponseInner>>
+  p data # => <DeleteSuppression200Response>
 rescue Sendpost::ApiError => e
   puts "Error when calling SuppressionApi->delete_suppression_with_http_info: #{e}"
 end
@@ -139,7 +139,7 @@ end
 
 ### Return type
 
-[**Array&lt;DeleteSuppression200ResponseInner&gt;**](DeleteSuppression200ResponseInner.md)
+[**DeleteSuppression200Response**](DeleteSuppression200Response.md)
 
 ### Authorization
 
@@ -157,7 +157,7 @@ end
 
 List Suppressions
 
-Retrieves a list of suppressions associated with a specific sub-account within a given date range. The maximum difference between `from` and `to` dates should not exceed 60 days. 
+Retrieve the suppression list for your sub-account. Suppressions are email addresses that should not receive emails to protect your sender reputation and ensure compliance.  **Suppression Types:** | Type | Reason Code | Description | |------|-------------|-------------| | `manual` | 0 | Manually added by your team | | `unsubscribe` | 1 | User clicked unsubscribe link | | `hardBounce` | 2 | Permanent delivery failure (invalid address) | | `spamComplaint` | 3 | User marked email as spam |  **Why Suppressions Matter:** - **Reputation Protection:** Repeatedly sending to bounced addresses damages sender reputation - **Compliance:** Required for CAN-SPAM, GDPR, and other regulations - **Cost Savings:** Avoid paying to send undeliverable emails - **Deliverability:** ISPs penalize senders with high bounce/complaint rates  **Use Cases:** - Export suppression list for compliance audits - Sync suppressions with your CRM or marketing platform - Review recent bounces to identify data quality issues - Monitor spam complaints for content/targeting problems  **Pagination:** Use `limit` and `offset` for large suppression lists.  **Note:** Maximum date range is 60 days. 
 
 ### Examples
 
@@ -173,13 +173,13 @@ Sendpost.configure do |config|
 end
 
 api_instance = Sendpost::SuppressionApi.new
-from = Date.parse('2013-10-20') # Date | Start date for the suppression records
-to = Date.parse('2013-10-20') # Date | End date for the suppression records (Note: `from` should be earlier than `to` and the date range should not exceed 60 days) 
+from = Date.parse('2024-01-01') # Date | Start date for suppression records (inclusive). Format YYYY-MM-DD.
+to = Date.parse('2024-01-31') # Date | End date for suppression records (inclusive). Max 60 days from `from` date.
 opts = {
-  limit: 56, # Integer | Number of records to return per request
-  offset: 56, # Integer | Number of initial records to skip
-  search: 'search_example', # String | Case-insensitive search against suppression email
-  type: 'hardBounce' # String | Type of suppression. Valid values: `hardBounce`, `manual`, `spamComplaint`, `unsubscribe` 
+  limit: 50, # Integer | Number of records to return per request. Default 20, max 100.
+  offset: 0, # Integer | Number of initial records to skip for pagination.
+  search: '@example.com', # String | Case-insensitive search against suppression email addresses.
+  type: 'hardBounce' # String | Filter by suppression type. Omit to return all types.
 }
 
 begin
@@ -213,12 +213,12 @@ end
 
 | Name | Type | Description | Notes |
 | ---- | ---- | ----------- | ----- |
-| **from** | **Date** | Start date for the suppression records |  |
-| **to** | **Date** | End date for the suppression records (Note: &#x60;from&#x60; should be earlier than &#x60;to&#x60; and the date range should not exceed 60 days)  |  |
-| **limit** | **Integer** | Number of records to return per request | [optional][default to 20] |
-| **offset** | **Integer** | Number of initial records to skip | [optional][default to 0] |
-| **search** | **String** | Case-insensitive search against suppression email | [optional] |
-| **type** | **String** | Type of suppression. Valid values: &#x60;hardBounce&#x60;, &#x60;manual&#x60;, &#x60;spamComplaint&#x60;, &#x60;unsubscribe&#x60;  | [optional] |
+| **from** | **Date** | Start date for suppression records (inclusive). Format YYYY-MM-DD. |  |
+| **to** | **Date** | End date for suppression records (inclusive). Max 60 days from &#x60;from&#x60; date. |  |
+| **limit** | **Integer** | Number of records to return per request. Default 20, max 100. | [optional][default to 20] |
+| **offset** | **Integer** | Number of initial records to skip for pagination. | [optional][default to 0] |
+| **search** | **String** | Case-insensitive search against suppression email addresses. | [optional] |
+| **type** | **String** | Filter by suppression type. Omit to return all types. | [optional] |
 
 ### Return type
 

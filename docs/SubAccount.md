@@ -4,22 +4,15 @@
 
 | Name | Type | Description | Notes |
 | ---- | ---- | ----------- | ----- |
-| **id** | **Integer** | Unique ID for the sub-account. | [optional] |
-| **api_key** | **String** | API key for the sub-account. | [optional] |
-| **name** | **String** | Name of the sub-account. | [optional] |
-| **labels** | [**Array&lt;Label&gt;**](Label.md) | Labels associated with the sub-account | [optional] |
-| **smtp_auths** | [**Array&lt;SMTPAuth&gt;**](SMTPAuth.md) | SMTP Auths associated with the sub-account | [optional] |
-| **type** | **Integer** | Type of the sub-account | [optional] |
-| **is_plus** | **Boolean** | Indicates whether the sub-account is a Plus sub-account | [optional] |
-| **created** | **Integer** | UNIX epoch nano timestamp when the sub-account was created. | [optional] |
-| **created_by** | **Hash&lt;String, Object&gt;** | Member who created the sub-account | [optional] |
-| **updated_by** | **Hash&lt;String, Object&gt;** | Member who updated the sub-account | [optional] |
-| **blocked** | **Boolean** | Indicates whether the sub-account is blocked | [optional] |
-| **blocked_at** | **Integer** | UNIX epoch nano timestamp when the sub-account was blocked (0 if not blocked) | [optional] |
-| **block_reason** | **String** | Reason for blocking the sub-account | [optional] |
-| **hb_exempt** | **Boolean** | Indicates whether the sub-account is exempt from hard bounce tracking | [optional] |
-| **generate_weekly_report** | **Boolean** | Indicates whether weekly reports are generated for this sub-account | [optional] |
-| **handlers** | **Array&lt;String&gt;** | Handlers associated with the sub-account | [optional] |
+| **id** | **Integer** | Unique identifier for the sub-account | [optional] |
+| **account_id** | **Integer** | Identifier of the parent account this sub-account belongs to | [optional] |
+| **name** | **String** | Display name for the sub-account. Must be unique within your account. Use descriptive names.  | [optional] |
+| **api_key** | **String** | API key for this sub-account. Use this as the &#x60;X-SubAccount-ApiKey&#x60; header when making API calls for this sub-account (sending emails, managing domains, etc.).  **Security:** Treat this like a password. Rotate if compromised.  | [optional] |
+| **type** | **Integer** | Type of sub-account: - &#x60;0&#x60; &#x3D; Default (the primary sub-account created with your account) - &#x60;1&#x60; &#x3D; Custom (additional sub-accounts you create)  Note: The default sub-account cannot be deleted.  | [optional] |
+| **is_plus** | **Boolean** | Whether this sub-account belongs to a SendX Plus customer. SendX Plus is a premium tier that provides enhanced features and support.  | [optional] |
+| **labels** | [**Array&lt;Label&gt;**](Label.md) | Custom labels for organizing and filtering sub-accounts | [optional] |
+| **blocked** | **Boolean** | Whether the sub-account is blocked from sending. A blocked sub-account cannot send emails. Common reasons: - High bounce/spam rates - Billing issues - Policy violations - Manual suspension by administrator  | [optional] |
+| **created** | **Integer** | UNIX epoch timestamp in nanoseconds when the sub-account was created | [optional] |
 
 ## Example
 
@@ -28,21 +21,14 @@ require 'sendpost_ruby_sdk'
 
 instance = Sendpost::SubAccount.new(
   id: 50441,
+  account_id: 4021,
+  name: Transactional - Production,
   api_key: pR0YIuxYSbVwmQi2Y8Qs,
-  name: API,
-  labels: [],
-  smtp_auths: null,
   type: 1,
   is_plus: false,
-  created: 1733844681120384500,
-  created_by: null,
-  updated_by: null,
+  labels: null,
   blocked: false,
-  blocked_at: 0,
-  block_reason: ,
-  hb_exempt: false,
-  generate_weekly_report: false,
-  handlers: []
+  created: 1704067200000000000
 )
 ```
 

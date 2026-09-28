@@ -4,29 +4,14 @@
 
 | Name | Type | Description | Notes |
 | ---- | ---- | ----------- | ----- |
-| **id** | **Integer** | Unique ID for the IP |  |
-| **public_ip** | **String** | The public IP address associated with the resource |  |
-| **system_domain** | [**Domain**](Domain.md) |  | [optional] |
-| **reverse_dns_hostname** | **String** | The reverse DNS hostname for the IP | [optional] |
-| **type** | **Integer** | Type of the IP | [optional] |
-| **gmail_settings** | **String** | Configuration for Gmail delivery settings in JSON format | [optional] |
-| **yahoo_settings** | **String** | Configuration for Yahoo delivery settings in JSON format | [optional] |
-| **aol_settings** | **String** | Configuration for AOL delivery settings in JSON format | [optional] |
-| **microsoft_settings** | **String** | Configuration for Microsoft delivery settings in JSON format | [optional] |
-| **comcast_settings** | **String** | Configuration for Comcast delivery settings in JSON format | [optional] |
-| **yandex_settings** | **String** | Configuration for Yandex delivery settings in JSON format | [optional] |
-| **gmx_settings** | **String** | Configuration for GMX delivery settings in JSON format | [optional] |
-| **mailru_settings** | **String** | Configuration for Mail.ru delivery settings in JSON format | [optional] |
-| **icloud_settings** | **String** | Configuration for iCloud delivery settings in JSON format | [optional] |
-| **zoho_settings** | **String** | Configuration for Zoho delivery settings in JSON format | [optional] |
-| **qq_settings** | **String** | Configuration for QQ delivery settings in JSON format | [optional] |
-| **default_settings** | **String** | Default delivery settings in JSON format | [optional] |
-| **att_settings** | **String** | Configuration for AT&amp;T delivery settings in JSON format | [optional] |
-| **created** | **Integer** | The timestamp (UNIX epoch) when the IP was created |  |
-| **infra_classification** | **String** | Classification of the infrastructure | [optional] |
-| **infra_monitor** | **Boolean** | Indicates whether infrastructure monitoring is enabled | [optional] |
-| **state** | **Integer** | The state of the IP | [optional] |
-| **auto_warmup_plan** | [**AutoWarmupPlan**](AutoWarmupPlan.md) | The auto-warmup plan associated with the IP. Can be null if no warmup plan is assigned. | [optional] |
+| **id** | **Integer** | Unique identifier for the IP resource | [optional] |
+| **public_ip** | **String** | The public IPv4 address used for sending emails. This is the IP that receiving mail servers will see.  | [optional] |
+| **reverse_dns_hostname** | **String** | The reverse DNS (PTR record) hostname for this IP. Properly configured rDNS is important for deliverability. Format: sp{id}.{region}.sendpost.email  | [optional] |
+| **type** | **Integer** | Type of IP allocation: - &#x60;0&#x60; &#x3D; Shared IP (shared with other SendPost senders, pooled reputation) - &#x60;1&#x60; &#x3D; Dedicated IP (exclusive to your account, your own reputation)  | [optional] |
+| **auto_warmup_enabled** | **Boolean** | Whether automatic IP warmup is enabled. When enabled, SendPost automatically manages sending volume to gradually build reputation on this IP.  | [optional] |
+| **labels** | [**Array&lt;Label&gt;**](Label.md) | Custom labels/tags for organizing IPs | [optional] |
+| **state** | **Integer** | Current state of the IP: - &#x60;0&#x60; &#x3D; Warmup (IP is in warmup phase, gradually building reputation) - &#x60;1&#x60; &#x3D; Normal (IP is fully warmed and ready for full sending volume)  | [optional] |
+| **created** | **Integer** | UNIX epoch timestamp in nanoseconds when the IP was allocated | [optional] |
 
 ## Example
 
@@ -36,27 +21,12 @@ require 'sendpost_ruby_sdk'
 instance = Sendpost::IP.new(
   id: 11321,
   public_ip: 52.34.11.12,
-  system_domain: null,
-  reverse_dns_hostname: example.mtaspg.email,
-  type: 0,
-  gmail_settings: {&quot;name&quot;:&quot;gmail&quot;,&quot;maxConcurrentConnections&quot;:100,...},
-  yahoo_settings: {&quot;name&quot;:&quot;yahoo&quot;,&quot;maxConcurrentConnections&quot;:16,...},
-  aol_settings: {&quot;name&quot;:&quot;aol&quot;,&quot;maxConcurrentConnections&quot;:20,...},
-  microsoft_settings: {&quot;name&quot;:&quot;microsoft&quot;,&quot;maxConcurrentConnections&quot;:16,...},
-  comcast_settings: {&quot;name&quot;:&quot;comcast&quot;,&quot;maxConcurrentConnections&quot;:20,...},
-  yandex_settings: {&quot;name&quot;:&quot;yandex&quot;,&quot;maxConcurrentConnections&quot;:2,...},
-  gmx_settings: {&quot;name&quot;:&quot;gmx&quot;,&quot;maxConcurrentConnections&quot;:2,...},
-  mailru_settings: {&quot;name&quot;:&quot;mailru&quot;,&quot;maxConcurrentConnections&quot;:1,...},
-  icloud_settings: {&quot;name&quot;:&quot;icloud&quot;,&quot;maxConcurrentConnections&quot;:20,...},
-  zoho_settings: {&quot;name&quot;:&quot;zoho&quot;,&quot;maxConcurrentConnections&quot;:1,...},
-  qq_settings: {&quot;name&quot;:&quot;qq&quot;,&quot;maxConcurrentConnections&quot;:1,...},
-  default_settings: {&quot;name&quot;:&quot;default&quot;,&quot;maxConcurrentConnections&quot;:14,...},
-  att_settings: {&quot;name&quot;:&quot;att&quot;,&quot;maxConcurrentConnections&quot;:1,...},
-  created: 1703224038766344700,
-  infra_classification: ,
-  infra_monitor: true,
+  reverse_dns_hostname: sp11321.mtaspg.email,
+  type: 1,
+  auto_warmup_enabled: true,
+  labels: null,
   state: 1,
-  auto_warmup_plan: null
+  created: 1704067200000000000
 )
 ```
 
